@@ -1,7 +1,8 @@
 /** @type {import('jest').Config} */
 const config = {
-    preset: 'ts-jest/presets/default-esm',
-    testEnvironment: 'node',
+    preset: 'ts-jest',
+    testEnvironment: 'jsdom',
+    setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
     roots: ['<rootDir>/src'],
     testMatch: [
         '**/__tests__/**/*.+(ts|tsx|js)',
@@ -9,10 +10,14 @@ const config = {
     ],
     transform: {
         '^.+\\.(ts|tsx)$': ['ts-jest', {
-            useESM: true
+            tsconfig: {
+                jsx: 'react-jsx'
+            }
         }],
         '^.+\\.(js|jsx)$': ['ts-jest', {
-            useESM: true
+            tsconfig: {
+                jsx: 'react-jsx'
+            }
         }]
     },
     collectCoverageFrom: [
@@ -20,9 +25,8 @@ const config = {
         '!src/**/*.d.ts',
     ],
     moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
-    extensionsToTreatAsEsm: ['.ts'],
     moduleNameMapper: {
-        '^(\\.{1,2}/.*)\\.js$': '$1'
+        '^@/(.*)$': '<rootDir>/src/$1'
     }
 };
 
