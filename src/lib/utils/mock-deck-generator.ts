@@ -30,17 +30,22 @@
  * @param {object | array} testCase
  * @return {array} 
  */
-function generateMockDeck(testCase) {
-    // Define the complete deck of 52 cards
-    const suits = ['Clubs', 'Diamonds', 'Hearts', 'Spades'];
-    const ranks = ['Ace', 'King', 'Queen', 'Jack', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
 
-    const fullDeck = suits.flatMap(suit =>
+type Card = string;
+type PlayerHands = Record<string, Card[]>;
+type TestCase = Card[] | PlayerHands;
+
+export function generateMockDeck(testCase: TestCase): Card[] {
+    // Define the complete deck of 52 cards
+    const suits: string[] = ['Clubs', 'Diamonds', 'Hearts', 'Spades'];
+    const ranks: string[] = ['Ace', 'King', 'Queen', 'Jack', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
+
+    const fullDeck: Card[] = suits.flatMap(suit =>
         ranks.map(rank => `${suit}-${rank}`)
     );
 
     // Validate that testCase cards are valid
-    const validateCard = (card) => {
+    const validateCard = (card: unknown): card is Card => {
         if (typeof card !== 'string' || card === null) return false;
         const parts = card.split('-');
         if (parts.length !== 2) return false;
@@ -48,7 +53,7 @@ function generateMockDeck(testCase) {
         return suits.includes(suit) && ranks.includes(rank);
     };
 
-    let testCards = [];
+    let testCards: Card[] = [];
 
     if (Array.isArray(testCase)) {
         // Handle array format
@@ -67,7 +72,7 @@ function generateMockDeck(testCase) {
 
         for (let cardIndex = 0; cardIndex < maxHandSize; cardIndex++) {
             for (const playerId of playerIds) {
-                const playerHand = testCase[playerId];
+                const playerHand = testCase[playerId.toString()];
                 if (cardIndex < playerHand.length) {
                     testCards.push(playerHand[cardIndex]);
                 }
@@ -109,5 +114,3 @@ function generateMockDeck(testCase) {
     // Return test cards followed by shuffled remaining cards
     return [...testCards, ...shuffledRemaining];
 }
-
-module.exports = { generateMockDeck };
