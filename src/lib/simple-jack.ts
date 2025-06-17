@@ -1,6 +1,4 @@
-"use strict";
-
-export function simpleJack(deck, players) {
+export function simpleJack(deck: string[], players: number): string | null {
     // Validate that the number of players is correct.
 
     if (!players || players < 2 || players > 6 || typeof players !== "number") {
@@ -9,13 +7,16 @@ export function simpleJack(deck, players) {
 
     // Validation data.
 
+    type Suit = "Clubs" | "Diamonds" | "Hearts" | "Spades";
+    type Value = "Ace" | "Queen" | "King" | "Jack" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10";
+
     const validationData = {
         suits: {
             Clubs: "Clubs",
             Diamonds: "Diamonds",
             Hearts: "Hearts",
             Spades: "Spades"
-        },
+        } as Record<Suit, string>,
         values: {
             Ace: "Ace",
             Queen: "Queen",
@@ -31,14 +32,14 @@ export function simpleJack(deck, players) {
             "8": 8,
             "9": 9,
             "10": 10
-        }
+        } as Record<Value, string | number>
     }
 
     // Helper function to validate a card.
 
-    function isCardValid(testCard) {
+    function isCardValid(testCard: string): boolean {
         const cardParts = testCard.split("-");
-        if (!validationData.suits[cardParts[0]] || !validationData.values[cardParts[1]]) {
+        if (!validationData.suits[cardParts[0] as Suit] || !validationData.values[cardParts[1] as Value]) {
             throw new Error("Card is not valid.");
         }
         return true;
@@ -62,18 +63,20 @@ export function simpleJack(deck, players) {
     // Function to validate card when dealt.
 
     function validateCard() {
-        const cardsDealt = [];
-        return function (testCard) {
+        const cardsDealt: string[] = [];
+        return function (testCard: string): string {
             if (isCardValid(testCard)) {
                 cardsDealt.push(testCard);
                 return testCard;
+            } else {
+                throw new Error("Invalid card");
             }
         }
     }
 
     // Helper function to get the card value.
 
-    function getCardValue(card, currentScore) {
+    function getCardValue(card: string, currentScore: number): number {
         if (!card) {
             throw new Error('Card has empty value.');
         }
@@ -99,9 +102,16 @@ export function simpleJack(deck, players) {
         }
     }
 
-    function PlayerCardHand() {
-        let score = 0;
-        let cards = [];
+    interface PlayerHand {
+        score: number;
+        cards: string[];
+        cardsToString: () => string;
+        playerId: number;
+    }
+
+    function createPlayerHand(): PlayerHand {
+        const score: number = 0;
+        const cards: string[] = [];
         const cardsToString = function () {
             const str = `[${cards.reduce((acc, card, idx, arr) => {
                 if (idx === arr.length - 1) {
@@ -115,19 +125,20 @@ export function simpleJack(deck, players) {
         return {
             score,
             cards,
-            cardsToString
+            cardsToString,
+            playerId: 0
         }
     }
 
     // Initialize.
 
-    let winner;
-    let gameOver = false;
-    let highScore = 0;
+    let winner: number | undefined;
+    let gameOver: boolean = false;
+    let highScore: number = 0;
 
     // Store the players' hands.
 
-    const playerHands = new Array(players);
+    const playerHands: PlayerHand[] = new Array(players);
 
     // Keep dealing until the game is over.
 
@@ -136,7 +147,7 @@ export function simpleJack(deck, players) {
     while (!gameOver) {
         // Initialize cards dealt on turn.
 
-        let cardsDealtOnTurn = 0;
+        let cardsDealtOnTurn: number = 0;
 
         // Deal cards to each player if required.
 
@@ -145,7 +156,7 @@ export function simpleJack(deck, players) {
             // Initialize player hand object on first turn.
 
             if (!playerHands[i]) {
-                playerHands[i] = PlayerCardHand();
+                playerHands[i] = createPlayerHand();
                 playerHands[i].playerId = i + 1;
             }
 
@@ -154,12 +165,12 @@ export function simpleJack(deck, players) {
                 //  and check if the card is valid.
 
                 // Check for an exhausted deck.
-                if (deck.length === 0) {
+                if (deck.length <= 0) {
                     gameOver = true;
                     break;
                 }
 
-                const playerCard = validator(deck.shift());
+                const playerCard: string = validator(deck.shift()!);
 
                 // Increment cards dealt on turn.
 

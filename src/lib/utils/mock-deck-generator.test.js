@@ -1,4 +1,4 @@
-import { generateMockDeck } from './mock-deck-generator.js';
+import { generateMockDeck } from './mock-deck-generator.ts';
 
 describe('generateMockDeck', () => {
     // Helper function to validate a complete deck

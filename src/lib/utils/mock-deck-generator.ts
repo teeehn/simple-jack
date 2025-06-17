@@ -1,5 +1,3 @@
-"use strict";
-
 /**
  * Creates a test deck of 52 unique strings which represent
  *  cards in a deck.
@@ -30,7 +28,7 @@
  * @param {object | array} testCase
  * @return {array} 
  */
-function generateMockDeck(testCase) {
+export function generateMockDeck(testCase: string[] | { [key: string]: string[] }): string[] {
     // Define the complete deck of 52 cards
     const suits = ['Clubs', 'Diamonds', 'Hearts', 'Spades'];
     const ranks = ['Ace', 'King', 'Queen', 'Jack', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
@@ -40,7 +38,7 @@ function generateMockDeck(testCase) {
     );
 
     // Validate that testCase cards are valid
-    const validateCard = (card) => {
+    const validateCard = (card: string): boolean => {
         if (typeof card !== 'string' || card === null) return false;
         const parts = card.split('-');
         if (parts.length !== 2) return false;
@@ -48,7 +46,7 @@ function generateMockDeck(testCase) {
         return suits.includes(suit) && ranks.includes(rank);
     };
 
-    let testCards = [];
+    let testCards: string[] = [];
 
     if (Array.isArray(testCase)) {
         // Handle array format
@@ -109,5 +107,3 @@ function generateMockDeck(testCase) {
     // Return test cards followed by shuffled remaining cards
     return [...testCards, ...shuffledRemaining];
 }
-
-module.exports = { generateMockDeck };

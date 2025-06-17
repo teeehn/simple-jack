@@ -1,4 +1,4 @@
-import { simpleJack } from "./simple-jack";
+import { simpleJack } from "./simple-jack.ts";
 
 function createMockDeck() {
     const deck = ["Clubs", "Diamonds", "Hearts", "Spades"].map((suit) => {
