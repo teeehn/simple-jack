@@ -110,4 +110,4 @@ function generateMockDeck(testCase) {
     return [...testCards, ...shuffledRemaining];
 }
 
-module.exports = { generateMockDeck };
+export { generateMockDeck };
