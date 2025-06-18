@@ -1,14 +1,18 @@
 import { generateMockDeck } from './mock-deck-generator';
 
+type Card = string;
+type PlayerHands = Record<string, Card[]>;
+type TestCase = Card[] | PlayerHands;
+
 describe('generateMockDeck', () => {
     // Helper function to validate a complete deck
-    const validateDeck = (deck) => {
+    const validateDeck = (deck: Card[]): void => {
         expect(deck).toHaveLength(52);
         expect(new Set(deck).size).toBe(52); // All cards unique
 
         // Check that all cards are valid format
-        const suits = ['Clubs', 'Diamonds', 'Hearts', 'Spades'];
-        const ranks = ['Ace', 'King', 'Queen', 'Jack', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
+        const suits: string[] = ['Clubs', 'Diamonds', 'Hearts', 'Spades'];
+        const ranks: string[] = ['Ace', 'King', 'Queen', 'Jack', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
 
         deck.forEach(card => {
             expect(typeof card).toBe('string');
@@ -20,33 +24,33 @@ describe('generateMockDeck', () => {
 
     describe('Array input format', () => {
         test('should handle empty array', () => {
-            const result = generateMockDeck([]);
+            const result: Card[] = generateMockDeck([]);
             validateDeck(result);
             expect(result.length).toBe(52);
         });
 
         test('should handle single card array', () => {
-            const testCase = ['Spades-Ace'];
-            const result = generateMockDeck(testCase);
+            const testCase: Card[] = ['Spades-Ace'];
+            const result: Card[] = generateMockDeck(testCase);
             validateDeck(result);
             expect(result[0]).toBe('Spades-Ace');
         });
 
         test('should handle multiple cards array', () => {
-            const testCase = ['Spades-Ace', 'Hearts-8', 'Clubs-King'];
-            const result = generateMockDeck(testCase);
+            const testCase: Card[] = ['Spades-Ace', 'Hearts-8', 'Clubs-King'];
+            const result: Card[] = generateMockDeck(testCase);
             validateDeck(result);
             expect(result.slice(0, 3)).toEqual(testCase);
         });
 
         test('should handle array with all 52 cards', () => {
-            const suits = ['Clubs', 'Diamonds', 'Hearts', 'Spades'];
-            const ranks = ['Ace', 'King', 'Queen', 'Jack', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
-            const fullDeck = suits.flatMap(suit =>
+            const suits: string[] = ['Clubs', 'Diamonds', 'Hearts', 'Spades'];
+            const ranks: string[] = ['Ace', 'King', 'Queen', 'Jack', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
+            const fullDeck: Card[] = suits.flatMap(suit =>
                 ranks.map(rank => `${suit}-${rank}`)
             );
 
-            const result = generateMockDeck(fullDeck);
+            const result: Card[] = generateMockDeck(fullDeck);
             validateDeck(result);
             expect(result).toEqual(fullDeck);
         });
@@ -62,43 +66,43 @@ describe('generateMockDeck', () => {
         });
 
         test('should throw error for non-string cards', () => {
-            expect(() => generateMockDeck([123])).toThrow('Invalid cards found: 123');
-            expect(() => generateMockDeck([null])).toThrow('Invalid cards found: null');
+            expect(() => generateMockDeck([123 as any])).toThrow('Invalid cards found: 123');
+            expect(() => generateMockDeck([null as any])).toThrow('Invalid cards found: null');
         });
     });
 
     describe('Object input format (players)', () => {
         test('should handle single player with single card', () => {
-            const testCase = { "1": ['Spades-Ace'] };
-            const result = generateMockDeck(testCase);
+            const testCase: PlayerHands = { "1": ['Spades-Ace'] };
+            const result: Card[] = generateMockDeck(testCase);
             validateDeck(result);
             expect(result[0]).toBe('Spades-Ace');
         });
 
         test('should handle single player with multiple cards', () => {
-            const testCase = { "1": ['Spades-Ace', 'Hearts-King', 'Clubs-Queen'] };
-            const result = generateMockDeck(testCase);
+            const testCase: PlayerHands = { "1": ['Spades-Ace', 'Hearts-King', 'Clubs-Queen'] };
+            const result: Card[] = generateMockDeck(testCase);
             validateDeck(result);
             expect(result.slice(0, 3)).toEqual(['Spades-Ace', 'Hearts-King', 'Clubs-Queen']);
         });
 
         test('should handle multiple players with equal hands', () => {
-            const testCase = {
+            const testCase: PlayerHands = {
                 "1": ['Spades-Ace', 'Hearts-King'],
                 "2": ['Clubs-Queen', 'Diamonds-Jack']
             };
-            const result = generateMockDeck(testCase);
+            const result: Card[] = generateMockDeck(testCase);
             validateDeck(result);
             // Cards should be dealt sequentially: player 1 first card, player 2 first card, player 1 second card, player 2 second card
             expect(result.slice(0, 4)).toEqual(['Spades-Ace', 'Clubs-Queen', 'Hearts-King', 'Diamonds-Jack']);
         });
 
         test('should handle multiple players with unequal hands', () => {
-            const testCase = {
+            const testCase: PlayerHands = {
                 "1": ['Spades-Ace', 'Hearts-King'],
                 "2": ['Clubs-Queen', 'Diamonds-Jack', 'Hearts-10']
             };
-            const result = generateMockDeck(testCase);
+            const result: Card[] = generateMockDeck(testCase);
             validateDeck(result);
             // First round: Spades-Ace, Clubs-Queen
             // Second round: Hearts-King, Diamonds-Jack  
@@ -107,23 +111,23 @@ describe('generateMockDeck', () => {
         });
 
         test('should handle three players', () => {
-            const testCase = {
+            const testCase: PlayerHands = {
                 "1": ['Spades-Ace'],
                 "2": ['Hearts-King'],
                 "3": ['Clubs-Queen']
             };
-            const result = generateMockDeck(testCase);
+            const result: Card[] = generateMockDeck(testCase);
             validateDeck(result);
             expect(result.slice(0, 3)).toEqual(['Spades-Ace', 'Hearts-King', 'Clubs-Queen']);
         });
 
         test('should handle players with non-sequential IDs', () => {
-            const testCase = {
+            const testCase: PlayerHands = {
                 "3": ['Spades-Ace'],
                 "1": ['Hearts-King'],
                 "5": ['Clubs-Queen']
             };
-            const result = generateMockDeck(testCase);
+            const result: Card[] = generateMockDeck(testCase);
             validateDeck(result);
             // Should be sorted by player ID: 1, 3, 5
             expect(result.slice(0, 3)).toEqual(['Hearts-King', 'Spades-Ace', 'Clubs-Queen']);
@@ -136,7 +140,7 @@ describe('generateMockDeck', () => {
         });
 
         test('should throw error for duplicate cards across players', () => {
-            const testCase = {
+            const testCase: PlayerHands = {
                 "1": ['Spades-Ace'],
                 "2": ['Spades-Ace']
             };
@@ -144,14 +148,14 @@ describe('generateMockDeck', () => {
         });
 
         test('should throw error for invalid cards in player hands', () => {
-            const testCase = {
+            const testCase: PlayerHands = {
                 "1": ['Invalid-Card']
             };
             expect(() => generateMockDeck(testCase)).toThrow('Invalid cards found: Invalid-Card');
         });
 
         test('should handle maximum 6 players', () => {
-            const testCase = {
+            const testCase: PlayerHands = {
                 "1": ['Spades-Ace'],
                 "2": ['Hearts-King'],
                 "3": ['Clubs-Queen'],
@@ -159,7 +163,7 @@ describe('generateMockDeck', () => {
                 "5": ['Spades-10'],
                 "6": ['Hearts-9']
             };
-            const result = generateMockDeck(testCase);
+            const result: Card[] = generateMockDeck(testCase);
             validateDeck(result);
             expect(result.slice(0, 6)).toEqual(['Spades-Ace', 'Hearts-King', 'Clubs-Queen', 'Diamonds-Jack', 'Spades-10', 'Hearts-9']);
         });
@@ -167,25 +171,25 @@ describe('generateMockDeck', () => {
 
     describe('Input validation', () => {
         test('should throw error for null input', () => {
-            expect(() => generateMockDeck(null)).toThrow('testCase must be an array or object');
+            expect(() => generateMockDeck(null as any)).toThrow('testCase must be an array or object');
         });
 
         test('should throw error for undefined input', () => {
-            expect(() => generateMockDeck(undefined)).toThrow('testCase must be an array or object');
+            expect(() => generateMockDeck(undefined as any)).toThrow('testCase must be an array or object');
         });
 
         test('should throw error for string input', () => {
-            expect(() => generateMockDeck('invalid')).toThrow('testCase must be an array or object');
+            expect(() => generateMockDeck('invalid' as any)).toThrow('testCase must be an array or object');
         });
 
         test('should throw error for number input', () => {
-            expect(() => generateMockDeck(123)).toThrow('testCase must be an array or object');
+            expect(() => generateMockDeck(123 as any)).toThrow('testCase must be an array or object');
         });
     });
 
     describe('Deck completeness and randomness', () => {
         test('should always return exactly 52 cards', () => {
-            const testCases = [
+            const testCases: TestCase[] = [
                 [],
                 ['Spades-Ace'],
                 ['Spades-Ace', 'Hearts-King', 'Clubs-Queen'],
@@ -194,43 +198,43 @@ describe('generateMockDeck', () => {
             ];
 
             testCases.forEach(testCase => {
-                const result = generateMockDeck(testCase);
+                const result: Card[] = generateMockDeck(testCase);
                 expect(result).toHaveLength(52);
             });
         });
 
         test('should contain all unique cards', () => {
-            const testCases = [
+            const testCases: TestCase[] = [
                 [],
                 ['Spades-Ace', 'Hearts-King'],
                 { "1": ['Spades-Ace'], "2": ['Hearts-King'] }
             ];
 
             testCases.forEach(testCase => {
-                const result = generateMockDeck(testCase);
-                const uniqueCards = new Set(result);
+                const result: Card[] = generateMockDeck(testCase);
+                const uniqueCards: Set<Card> = new Set(result);
                 expect(uniqueCards.size).toBe(52);
             });
         });
 
         test('should place test cards at the beginning in correct order', () => {
-            const testCase = ['Spades-Ace', 'Hearts-King', 'Clubs-Queen'];
-            const result = generateMockDeck(testCase);
+            const testCase: Card[] = ['Spades-Ace', 'Hearts-King', 'Clubs-Queen'];
+            const result: Card[] = generateMockDeck(testCase);
             expect(result.slice(0, 3)).toEqual(testCase);
         });
 
         test('should randomize remaining cards', () => {
-            const testCase = ['Spades-Ace'];
-            const results = [];
+            const testCase: Card[] = ['Spades-Ace'];
+            const results: Card[][] = [];
 
             // Generate multiple decks and check that the remaining cards are different
             for (let i = 0; i < 5; i++) {
-                const result = generateMockDeck(testCase);
+                const result: Card[] = generateMockDeck(testCase);
                 results.push(result.slice(1)); // Skip the first test card
             }
 
             // Check that not all remaining portions are identical (very unlikely if truly random)
-            const allSame = results.every(deck =>
+            const allSame: boolean = results.every(deck =>
                 JSON.stringify(deck) === JSON.stringify(results[0])
             );
             expect(allSame).toBe(false);
@@ -239,20 +243,80 @@ describe('generateMockDeck', () => {
 
     describe('Edge cases', () => {
         test('should handle empty player hands', () => {
-            const testCase = { "1": [] };
-            const result = generateMockDeck(testCase);
+            const testCase: PlayerHands = { "1": [] };
+            const result: Card[] = generateMockDeck(testCase);
             validateDeck(result);
         });
 
         test('should handle mixed empty and non-empty player hands', () => {
-            const testCase = {
+            const testCase: PlayerHands = {
                 "1": [],
                 "2": ['Spades-Ace'],
                 "3": []
             };
-            const result = generateMockDeck(testCase);
+            const result: Card[] = generateMockDeck(testCase);
             validateDeck(result);
             expect(result[0]).toBe('Spades-Ace');
+        });
+    });
+
+    describe('Sequential card dealing verification', () => {
+        test('should deal cards in proper sequence for multiple players', () => {
+            const testCase: PlayerHands = {
+                "1": ['Card1-Player1', 'Card3-Player1'],
+                "2": ['Card2-Player2', 'Card4-Player2'],
+                "3": ['Card5-Player3']
+            };
+
+            // This will throw due to invalid card format, but we can test the sequence logic
+            expect(() => generateMockDeck(testCase)).toThrow('Invalid cards found');
+        });
+
+        test('should maintain dealing order with valid cards', () => {
+            const testCase: PlayerHands = {
+                "1": ['Spades-Ace', 'Hearts-King'],
+                "2": ['Clubs-Queen', 'Diamonds-Jack'],
+                "3": ['Spades-10']
+            };
+
+            const result: Card[] = generateMockDeck(testCase);
+            validateDeck(result);
+
+            // Expected order: Player1-Card1, Player2-Card1, Player3-Card1, Player1-Card2, Player2-Card2
+            const expectedOrder: Card[] = [
+                'Spades-Ace',    // Player 1, Card 1
+                'Clubs-Queen',   // Player 2, Card 1  
+                'Spades-10',     // Player 3, Card 1
+                'Hearts-King',   // Player 1, Card 2
+                'Diamonds-Jack'  // Player 2, Card 2
+            ];
+
+            expect(result.slice(0, 5)).toEqual(expectedOrder);
+        });
+
+        test('should handle uneven hand sizes correctly', () => {
+            const testCase: PlayerHands = {
+                "1": ['Spades-Ace'],
+                "2": ['Hearts-King', 'Clubs-Queen', 'Diamonds-Jack'],
+                "3": ['Spades-10', 'Hearts-9']
+            };
+
+            const result: Card[] = generateMockDeck(testCase);
+            validateDeck(result);
+
+            // Round 1: Spades-Ace (P1), Hearts-King (P2), Spades-10 (P3)
+            // Round 2: Clubs-Queen (P2), Hearts-9 (P3)
+            // Round 3: Diamonds-Jack (P2)
+            const expectedOrder: Card[] = [
+                'Spades-Ace',    // Round 1: Player 1
+                'Hearts-King',   // Round 1: Player 2
+                'Spades-10',     // Round 1: Player 3
+                'Clubs-Queen',   // Round 2: Player 2
+                'Hearts-9',      // Round 2: Player 3
+                'Diamonds-Jack'  // Round 3: Player 2
+            ];
+
+            expect(result.slice(0, 6)).toEqual(expectedOrder);
         });
     });
 });

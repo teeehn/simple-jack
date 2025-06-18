@@ -1,6 +1,5 @@
 /** @type {import('jest').Config} */
 const config = {
-    preset: 'ts-jest',
     testEnvironment: 'jsdom',
     setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
     roots: ['<rootDir>/src'],
@@ -9,16 +8,7 @@ const config = {
         '**/*.(test|spec).+(ts|tsx|js)'
     ],
     transform: {
-        '^.+\\.(ts|tsx)$': ['ts-jest', {
-            tsconfig: {
-                jsx: 'react-jsx'
-            }
-        }],
-        '^.+\\.(js|jsx)$': ['ts-jest', {
-            tsconfig: {
-                jsx: 'react-jsx'
-            }
-        }]
+        '^.+\\.tsx?$': 'ts-jest'
     },
     collectCoverageFrom: [
         'src/**/*.{ts,tsx,js,jsx}',
