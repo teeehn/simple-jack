@@ -220,6 +220,7 @@ export default function Home() {
       const timer = setTimeout(dealNextCard, 500);
       return () => clearTimeout(timer);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameState?.gamePhase, gameState?.isDealing, gameState?.currentPlayerIndex]);
 
   if (!gameState) {
