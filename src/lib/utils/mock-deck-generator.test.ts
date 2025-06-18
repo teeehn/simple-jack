@@ -1,8 +1,9 @@
 import { generateMockDeck } from './mock-deck-generator';
+import { describe, test, expect } from '@jest/globals';
 
 describe('generateMockDeck', () => {
     // Helper function to validate a complete deck
-    const validateDeck = (deck) => {
+    const validateDeck = (deck: string[]) => {
         expect(deck).toHaveLength(52);
         expect(new Set(deck).size).toBe(52); // All cards unique
 
@@ -62,8 +63,8 @@ describe('generateMockDeck', () => {
         });
 
         test('should throw error for non-string cards', () => {
-            expect(() => generateMockDeck([123])).toThrow('Invalid cards found: 123');
-            expect(() => generateMockDeck([null])).toThrow('Invalid cards found: null');
+            expect(() => generateMockDeck([123 as any])).toThrow('Invalid cards found: 123');
+            expect(() => generateMockDeck([null as any])).toThrow('Invalid cards found: null');
         });
     });
 
@@ -167,19 +168,19 @@ describe('generateMockDeck', () => {
 
     describe('Input validation', () => {
         test('should throw error for null input', () => {
-            expect(() => generateMockDeck(null)).toThrow('testCase must be an array or object');
+            expect(() => generateMockDeck(null as any)).toThrow('testCase must be an array or object');
         });
 
         test('should throw error for undefined input', () => {
-            expect(() => generateMockDeck(undefined)).toThrow('testCase must be an array or object');
+            expect(() => generateMockDeck(undefined as any)).toThrow('testCase must be an array or object');
         });
 
         test('should throw error for string input', () => {
-            expect(() => generateMockDeck('invalid')).toThrow('testCase must be an array or object');
+            expect(() => generateMockDeck('invalid' as any)).toThrow('testCase must be an array or object');
         });
 
         test('should throw error for number input', () => {
-            expect(() => generateMockDeck(123)).toThrow('testCase must be an array or object');
+            expect(() => generateMockDeck(123 as any)).toThrow('testCase must be an array or object');
         });
     });
 
