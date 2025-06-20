@@ -2,7 +2,7 @@ import { generateMockDeck } from './mock-deck-generator';
 
 describe('generateMockDeck', () => {
     // Helper function to validate a complete deck
-    const validateDeck = (deck) => {
+    const validateDeck = (deck: string[]) => {
         expect(deck).toHaveLength(52);
         expect(new Set(deck).size).toBe(52); // All cards unique
 
@@ -62,8 +62,8 @@ describe('generateMockDeck', () => {
         });
 
         test('should throw error for non-string cards', () => {
-            expect(() => generateMockDeck([123])).toThrow('Invalid cards found: 123');
-            expect(() => generateMockDeck([null])).toThrow('Invalid cards found: null');
+            expect(() => generateMockDeck([123 as never])).toThrow('Invalid cards found: 123');
+            expect(() => generateMockDeck([null as never])).toThrow('Invalid cards found: null');
         });
     });
 
@@ -167,19 +167,19 @@ describe('generateMockDeck', () => {
 
     describe('Input validation', () => {
         test('should throw error for null input', () => {
-            expect(() => generateMockDeck(null)).toThrow('testCase must be an array or object');
+            expect(() => generateMockDeck(null as never)).toThrow('testCase must be an array or object');
         });
 
         test('should throw error for undefined input', () => {
-            expect(() => generateMockDeck(undefined)).toThrow('testCase must be an array or object');
+            expect(() => generateMockDeck(undefined as never)).toThrow('testCase must be an array or object');
         });
 
         test('should throw error for string input', () => {
-            expect(() => generateMockDeck('invalid')).toThrow('testCase must be an array or object');
+            expect(() => generateMockDeck('invalid' as never)).toThrow('testCase must be an array or object');
         });
 
         test('should throw error for number input', () => {
-            expect(() => generateMockDeck(123)).toThrow('testCase must be an array or object');
+            expect(() => generateMockDeck(123 as never)).toThrow('testCase must be an array or object');
         });
     });
 
@@ -194,7 +194,7 @@ describe('generateMockDeck', () => {
             ];
 
             testCases.forEach(testCase => {
-                const result = generateMockDeck(testCase);
+                const result = generateMockDeck(testCase as never);
                 expect(result).toHaveLength(52);
             });
         });
@@ -221,7 +221,7 @@ describe('generateMockDeck', () => {
 
         test('should randomize remaining cards', () => {
             const testCase = ['Spades-Ace'];
-            const results = [];
+            const results = [] as unknown[];
 
             // Generate multiple decks and check that the remaining cards are different
             for (let i = 0; i < 5; i++) {
