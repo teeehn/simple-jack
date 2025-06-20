@@ -1,7 +1,8 @@
 "use strict";
 
-type Card = string;
-type Suit = 'Clubs' | 'Diamonds' | 'Hearts' | 'Spades';
+export type Suit = "Hearts" | "Diamonds" | "Clubs" | "Spades";
+export type CardValue = "Ace" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | "Jack" | "Queen" | "King";
+export type Card = `${Suit}-${CardValue}`;
 
 interface ValidationData {
     suits: Record<Suit, Suit>;
@@ -15,7 +16,7 @@ interface PlayerHand {
     cardsToString: () => string;
 }
 
-export function simpleJack(deck: string[], players: number): string | null {
+export function simpleJack(deck: Card[], players: number): string | null {
     // Validate that the number of players is correct.
     if (!players || players < 2 || players > 6 || typeof players !== "number") {
         throw new Error("There must be 2 to 6 players");
