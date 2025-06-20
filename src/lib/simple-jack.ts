@@ -6,7 +6,7 @@ export type Card = `${Suit}-${CardValue}`;
 
 interface ValidationData {
     suits: Record<Suit, Suit>;
-    values: Record<string, string | number>;
+    values: Record<CardValue, CardValue>;
 }
 
 interface PlayerHand {
@@ -35,23 +35,22 @@ export function simpleJack(deck: Card[], players: number): string | null {
             Queen: "Queen",
             King: "King",
             Jack: "Jack",
-            "1": 1,
-            "2": 2,
-            "3": 3,
-            "4": 4,
-            "5": 5,
-            "6": 6,
-            "7": 7,
-            "8": 8,
-            "9": 9,
-            "10": 10
+            "2": "2",
+            "3": "3",
+            "4": "4",
+            "5": "5",
+            "6": "6",
+            "7": "7",
+            "8": "8",
+            "9": "9",
+            "10": "10"
         }
     }
 
     // Helper function to validate a card.
     function isCardValid(testCard: Card): boolean {
-        const cardParts = testCard.split("-");
-        if (!validationData.suits[cardParts[0] as Suit] || !validationData.values[cardParts[1]]) {
+        const [suit, value] = testCard.split("-");
+        if (!validationData.suits[suit as Suit] || !validationData.values[value as CardValue]) {
             throw new Error("Card is not valid.");
         }
         return true;
