@@ -1,0 +1,15 @@
+*
+!eslint.config.ts
+!index.html
+!package-lock.json
+!package.json
+!public
+!run_tests.sh
+!src
+!test
+!tsconfig*.json
+!jest.config.js
+!jest.setup.js
+!next.config.ts
+!postcss.config.mjs
+!eslint.config.mjs
