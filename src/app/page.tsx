@@ -19,7 +19,7 @@ interface PlayerHand {
 interface GameState {
   players: PlayerHand[];
   currentPlayerIndex: number;
-  gamePhase: 'setup' | 'dealing' | 'finished';
+  gamePhase: 'dealing' | 'finished';
   winner: number | null;
   commentary: string[];
   deck: string[];
@@ -131,7 +131,7 @@ export default function Home() {
   };
 
   const dealNextCard = () => {
-    if (!gameState || gameState.gamePhase !== 'dealing' || gameState.isDealing) return;
+    if (!gameState || gameState.gamePhase === 'finished') return;
     
     setGameState(prev => ({ ...prev!, isDealing: true }));
     
