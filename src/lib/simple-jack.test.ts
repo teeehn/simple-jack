@@ -1,4 +1,5 @@
-import { Card, simpleJack, Suit, CardValue } from "./simple-jack";
+import { simpleJack } from "./simple-jack";
+import { Card, Suit, CardValue } from "@/shared/types";
 
 const createMockDeck = (): Card[] => {
   const deck: Card[] = (["Clubs", "Diamonds", "Hearts", "Spades"] as Suit[])
