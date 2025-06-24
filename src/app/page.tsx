@@ -158,7 +158,7 @@ export default function Home() {
   const dealNextCard = () => {
     if (!gameState || gameState.gamePhase === "finished") return;
 
-    setGameState((prev) => ({ ...prev!, isDealing: true }));
+    setGameState({ ...gameState, isDealing: true });
 
     setTimeout(() => {
       setGameState((prev) => {
