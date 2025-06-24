@@ -1,6 +1,6 @@
 import { Card } from "@/shared/types";
 
-export const GameCommentary = {
+export const gameCommentary = {
   playerDraws: (playerId: number, card: Card) =>
     `Player ${playerId} draws ${card}`,
   player21: (playerId: number) =>
