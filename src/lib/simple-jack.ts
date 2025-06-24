@@ -1,69 +1,111 @@
 "use strict";
 
+import { Card, CardValue, PlayerHand, Suit } from "@/shared/types";
+
 import {
-  Card,
-  CardValue,
-  PlayerHand,
-  Suit,
-  ValidationData,
-} from "@/shared/types";
+  validationData,
+  DECK_SIZE,
+  MAX_PLAYERS,
+  MIN_PLAYERS,
+  MUST_STAND_SCORE,
+  SIMPLE_JACK_SCORE,
+} from "@/shared/constants";
 
-export function simpleJack(deck: Card[], players: number): string | null {
-  // Validate that the number of players is correct.
-  if (!players || players < 2 || players > 6 || typeof players !== "number") {
-    throw new Error("There must be 2 to 6 players");
+/**
+ * isCardValid - Validates a card based on validation data.
+ *  Returns true if the card is valid.
+ *  Throws an error if not valid.
+ *
+ * @param testCard {Card}
+ * @returns boolean
+ */
+export function isCardValid(testCard: Card): boolean {
+  const [suit, value] = testCard.split("-");
+  if (
+    !validationData.suits[suit as Suit] ||
+    !validationData.values[value as CardValue]
+  ) {
+    throw new Error("Card is not valid.");
   }
+  return true;
+}
 
-  // Validation data.
-  const validationData: ValidationData = {
-    suits: {
-      Clubs: "Clubs",
-      Diamonds: "Diamonds",
-      Hearts: "Hearts",
-      Spades: "Spades",
-    },
-    values: {
-      Ace: "Ace",
-      Queen: "Queen",
-      King: "King",
-      Jack: "Jack",
-      "2": "2",
-      "3": "3",
-      "4": "4",
-      "5": "5",
-      "6": "6",
-      "7": "7",
-      "8": "8",
-      "9": "9",
-      "10": "10",
-    },
-  };
-
-  // Helper function to validate a card.
-  function isCardValid(testCard: Card): boolean {
-    const [suit, value] = testCard.split("-");
-    if (
-      !validationData.suits[suit as Suit] ||
-      !validationData.values[value as CardValue]
-    ) {
-      throw new Error("Card is not valid.");
-    }
-    return true;
-  }
-
-  // Validate the deck.
+/**
+ * validateDeck - Throws an Error if the deck is not valid.
+ *
+ * @param deck {Card[]}
+ */
+export function validateDeck(deck: Card[]): void {
   if (!deck || !Array.isArray(deck)) {
     throw new Error("deck must be an array");
   }
-  if (deck.length !== 52) {
-    throw new Error("The deck must have 52 cards.");
+  if (deck.length !== DECK_SIZE) {
+    throw new Error(`The deck must have ${DECK_SIZE} cards.`);
   }
-  if (new Set(deck).size !== 52) {
-    throw new Error("The deck must have 52 unique cards.");
+  if (new Set(deck).size !== DECK_SIZE) {
+    throw new Error(`The deck must have ${DECK_SIZE} unique cards.`);
   }
   if (!deck.every((card) => isCardValid(card))) {
     throw new Error("All cards in deck must be valid.");
   }
+}
+
+/**
+ * validatePlayers - Throws an error if the number of players is invalid.
+ *
+ * @param players {number}
+ */
+export function validatePlayers(players: number) {
+  if (
+    !players ||
+    players < MIN_PLAYERS ||
+    players > MAX_PLAYERS ||
+    typeof players !== "number"
+  ) {
+    throw new Error(`There must be ${MIN_PLAYERS} to ${MAX_PLAYERS} players.`);
+  }
+}
+
+/**
+ * getCardValue - Determines the card value.
+ *
+ * @param card {Card}
+ * @param currentScore {number}
+ * @returns {number}
+ */
+export function getCardValue(card: Card, currentScore: number): number {
+  if (!card) {
+    throw new Error("Card has empty value.");
+  }
+  const cardPartArr = card.split("-");
+  const rawValue = cardPartArr[1];
+  if (rawValue === "King" || rawValue === "Queen" || rawValue === "Jack") {
+    return 10;
+  } else if (rawValue === "Ace") {
+    // Ace can be 11 or 1.
+    // Calculates the correct value based on current score.
+    if (currentScore + 11 <= SIMPLE_JACK_SCORE) {
+      return 11;
+    } else {
+      return 1;
+    }
+  } else {
+    const parsedValue = Number(rawValue);
+    if (isNaN(parsedValue)) {
+      throw new Error("Card value is not valid.");
+    }
+    return parsedValue;
+  }
+}
+
+export function simpleJack(deck: Card[], players: number): string | null {
+  // Validate that the number of players is correct.
+
+  validatePlayers(players);
+
+  // Validate the deck.
+
+  validateDeck(deck);
 
   // Function to validate card when dealt.
   function validateCard(): (testCard: Card) => Card {
@@ -77,33 +119,7 @@ export function simpleJack(deck: Card[], players: number): string | null {
     };
   }
 
-  // Helper function to get the card value.
-  function getCardValue(card: Card, currentScore: number): number {
-    if (!card) {
-      throw new Error("Card has empty value.");
-    }
-    const cardPartArr = card.split("-");
-    const rawValue = cardPartArr[1];
-    if (rawValue === "King" || rawValue === "Queen" || rawValue === "Jack") {
-      return 10;
-    } else if (rawValue === "Ace") {
-      // Ace can be 11 or 1.
-      // Calculates the correct value based on current score.
-      if (currentScore + 11 <= 21) {
-        return 11;
-      } else {
-        return 1;
-      }
-    } else {
-      const parsedValue = Number(rawValue);
-      if (isNaN(parsedValue)) {
-        throw new Error("Card value is not valid.");
-      }
-      return parsedValue;
-    }
-  }
-
-  function PlayerCardHand(): PlayerHand {
+  function playerCardHand(id: number): PlayerHand {
     const cards: Card[] = [];
     const cardsToString = function (): string {
       const str = `[${cards.reduce((acc, card, idx, arr) => {
@@ -116,10 +132,10 @@ export function simpleJack(deck: Card[], players: number): string | null {
       return str;
     };
     return {
-      score: 0,
       cards,
-      playerId: 0, // Will be set later
       cardsToString,
+      playerId: id,
+      score: 0,
     };
   }
 
@@ -129,9 +145,11 @@ export function simpleJack(deck: Card[], players: number): string | null {
   let highScore = 0;
 
   // Store the players' hands.
+
   const playerHands: PlayerHand[] = new Array(players);
 
   // Keep dealing until the game is over.
+
   const validator = validateCard();
 
   while (!gameOver) {
@@ -142,11 +160,10 @@ export function simpleJack(deck: Card[], players: number): string | null {
     for (let i = 0; i < players; i += 1) {
       // Initialize player hand object on first turn.
       if (!playerHands[i]) {
-        playerHands[i] = PlayerCardHand();
-        playerHands[i].playerId = i + 1;
+        playerHands[i] = playerCardHand(i + 1);
       }
 
-      if (playerHands[i]?.score < 17) {
+      if (playerHands[i]?.score < MUST_STAND_SCORE) {
         // Deal a card
         //  and check if the card is valid.
 
@@ -165,12 +182,12 @@ export function simpleJack(deck: Card[], players: number): string | null {
 
         playerHands[i].cards.push(playerCard);
 
-        if (playerHands[i].score === 21) {
+        if (playerHands[i].score === SIMPLE_JACK_SCORE) {
           winner = playerHands[i].playerId;
           gameOver = true;
-          highScore = 21;
+          highScore = SIMPLE_JACK_SCORE;
           break;
-        } else if (playerHands[i].score < 21) {
+        } else if (playerHands[i].score < SIMPLE_JACK_SCORE) {
           highScore =
             playerHands[i].score > highScore ? playerHands[i].score : highScore;
         }

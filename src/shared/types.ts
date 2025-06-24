@@ -23,6 +23,6 @@ export interface ValidationData {
 export interface PlayerHand {
   score: number;
   cards: Card[];
-  playerId: number;
+  playerId?: number;
   cardsToString: () => string;
 }
