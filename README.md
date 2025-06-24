@@ -10,9 +10,9 @@ There are 4 Suits of cards: Spades, Hearts, Clubs, Diamonds.
 
 Each suit consists of the following:
 
-1) 3 Face Cards: Jack, Queen, and King.
-2) 1 Ace.
-3) 9 Regular cards, which are numbered 2 through 10.
+1. 3 Face Cards: Jack, Queen, and King.
+2. 1 Ace.
+3. 9 Regular cards, which are numbered 2 through 10.
 
 The value of each Face Card is 10.
 The value of the Ace is either 1 or 11.
@@ -30,7 +30,7 @@ As soon as a hand with a value of 21 is dealt, the player holding that hand is i
 
 This would occur if the player has any card valued at 10 and an Ace. For example if the player’s hand is ["Clubs-King", "Spades-Ace"] the total would be 21 with the Ace assigned the value of 11.
 
-The value of the Ace is determined by the context of the hand the player holds and is evaluated  to give the player the best chance to win. For example, if the player has the hand `["Spades-10", "Hearts-Queen", "Hearts-Ace"]`, "Hearts-Ace" would be evaluated as 1, giving the player a winning hand of 21.
+The value of the Ace is determined by the context of the hand the player holds and is evaluated to give the player the best chance to win. For example, if the player has the hand `["Spades-10", "Hearts-Queen", "Hearts-Ace"]`, "Hearts-Ace" would be evaluated as 1, giving the player a winning hand of 21.
 
 The first player dealt a hand of 21 is declared the winner, there is no further dealing, and the game is finished.
 
@@ -63,10 +63,23 @@ pnpm dev
 bun dev
 ```
 
+## Docker
+
+### Build the image
+
+```
+./build_docker.sh simple_jack
+```
+
+#### Run the container and tests
+
+```
+docker run -t simple_jack ./run_tests.sh
+```
+
 ## Info
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
-
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
