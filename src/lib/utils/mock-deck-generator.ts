@@ -33,7 +33,7 @@ import { Card, CardValue, Suit, TestCase } from "@/shared/types";
  * @return {array}
  */
 
-export function generateMockDeck(testCase: TestCase): Card[] {
+export function generateMockDeck(testCase?: TestCase | null): Card[] {
   // Define the complete deck of 52 cards
   const suits: Suit[] = ["Clubs", "Diamonds", "Hearts", "Spades"];
   const ranks: CardValue[] = [

@@ -218,19 +218,13 @@ describe("generateMockDeck", () => {
     });
   });
 
-  // TODO: Update the input cases to include undefined test case.
-
   describe("Input validation", () => {
     test("should throw error for null input", () => {
-      expect(() => generateMockDeck(null as never)).toThrow(
-        "testCase must be an array or object"
-      );
+      expect(() => generateMockDeck(null)).not.toThrow();
     });
 
     test("should throw error for undefined input", () => {
-      expect(() => generateMockDeck(undefined as never)).toThrow(
-        "testCase must be an array or object"
-      );
+      expect(() => generateMockDeck()).not.toThrow();
     });
 
     test("should throw error for string input", () => {
@@ -248,7 +242,9 @@ describe("generateMockDeck", () => {
 
   describe("Deck completeness and randomness", () => {
     test("should always return exactly 52 cards", () => {
-      const testCases = [
+      const testCases: Array<TestCase | undefined | null> = [
+        undefined,
+        null,
         [],
         ["Spades-Ace"],
         ["Spades-Ace", "Hearts-King", "Clubs-Queen"],
@@ -263,7 +259,9 @@ describe("generateMockDeck", () => {
     });
 
     test("should contain all unique cards", () => {
-      const testCases: TestCase[] = [
+      const testCases: Array<TestCase | undefined | null> = [
+        undefined,
+        null,
         [],
         ["Spades-Ace", "Hearts-King"],
         { "1": ["Spades-Ace"], "2": ["Hearts-King"] },
