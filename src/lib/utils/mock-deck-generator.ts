@@ -1,5 +1,7 @@
 "use strict";
 
+import { Card, CardValue, Suit, TestCase } from "@/shared/types";
+
 /**
  * Creates a test deck of 52 unique strings which represent
  *  cards in a deck.
@@ -31,14 +33,10 @@
  * @return {array}
  */
 
-type Card = string;
-type PlayerHands = Record<string, Card[]>;
-type TestCase = Card[] | PlayerHands;
-
 export function generateMockDeck(testCase: TestCase): Card[] {
   // Define the complete deck of 52 cards
-  const suits: string[] = ["Clubs", "Diamonds", "Hearts", "Spades"];
-  const ranks: string[] = [
+  const suits: Suit[] = ["Clubs", "Diamonds", "Hearts", "Spades"];
+  const ranks: CardValue[] = [
     "Ace",
     "King",
     "Queen",
@@ -55,7 +53,7 @@ export function generateMockDeck(testCase: TestCase): Card[] {
   ];
 
   const fullDeck: Card[] = suits.flatMap((suit) =>
-    ranks.map((rank) => `${suit}-${rank}`)
+    ranks.map((rank): Card => `${suit}-${rank}`)
   );
 
   // Validate that testCase cards are valid
@@ -64,7 +62,7 @@ export function generateMockDeck(testCase: TestCase): Card[] {
     const parts = card.split("-");
     if (parts.length !== 2) return false;
     const [suit, rank] = parts;
-    return suits.includes(suit) && ranks.includes(rank);
+    return suits.includes(suit as Suit) && ranks.includes(rank as CardValue);
   };
 
   let testCards: Card[] = [];

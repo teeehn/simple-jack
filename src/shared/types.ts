@@ -26,3 +26,6 @@ export interface PlayerHand {
   playerId?: number;
   cardsToString: () => string;
 }
+
+export type PlayerHandsMockup = Record<string, Card[]>;
+export type TestCase = Card[] | PlayerHandsMockup;
