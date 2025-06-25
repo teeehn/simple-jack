@@ -98,6 +98,26 @@ export function getCardValue(card: Card, currentScore: number): number {
   }
 }
 
+/**
+ * validateCard
+ *
+ * Returns a function which validates a card and saves
+ *  the card to the cardsDealt property.
+ *  If the card is invalid it throws an error.
+ *
+ * @returns {function}
+ */
+function validateCard(): (testCard: Card) => Card {
+  const cardsDealt: Card[] = [];
+  return function (testCard: Card): Card {
+    if (isCardValid(testCard)) {
+      cardsDealt.push(testCard);
+      return testCard;
+    }
+    throw new Error("Invalid card dealt");
+  };
+}
+
 export function simpleJack(deck: Card[], players: number): string | null {
   // Validate that the number of players is correct.
 
@@ -106,18 +126,6 @@ export function simpleJack(deck: Card[], players: number): string | null {
   // Validate the deck.
 
   validateDeck(deck);
-
-  // Function to validate card when dealt.
-  function validateCard(): (testCard: Card) => Card {
-    const cardsDealt: Card[] = [];
-    return function (testCard: Card): Card {
-      if (isCardValid(testCard)) {
-        cardsDealt.push(testCard);
-        return testCard;
-      }
-      throw new Error("Invalid card dealt");
-    };
-  }
 
   function playerCardHand(id: number): PlayerHand {
     const cards: Card[] = [];
