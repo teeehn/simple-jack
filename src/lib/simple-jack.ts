@@ -1,5 +1,7 @@
 "use strict";
 
+import { generateMockDeck as generateDeck } from "@/lib/utils/mock-deck-generator";
+
 import { Card, CardValue, PlayerHand, Suit } from "@/shared/types";
 
 import {
@@ -122,7 +124,14 @@ export function simpleJack(props: {
   deck?: Card[] | null;
   players: number;
 }): string | null {
-  const { deck, players } = props;
+  const { players } = props;
+
+  // Generate a new shuffled deck if it is not supplied.
+
+  const deck =
+    !props?.deck || (Array.isArray(props?.deck) && props.deck.length === 0)
+      ? generateDeck()
+      : props.deck;
 
   // Validate that the number of players is correct.
 

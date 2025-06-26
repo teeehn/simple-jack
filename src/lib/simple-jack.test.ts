@@ -108,21 +108,33 @@ describe("Simple Jack", () => {
         })
       ).toThrow();
     });
+
     test("Deck can be an empty array, undefined, or null.", () => {
+      let value;
+
       // empty array deck
 
       expect(() => simpleJack({ deck: [], players: 2 })).not.toThrow();
-      expect(typeof simpleJack({ deck: [], players: 2 })).toBe("string");
+
+      value = simpleJack({ deck: [], players: 2 });
+
+      expect(typeof value === "string" || value === null).toBe(true);
 
       // undefined deck
 
       expect(() => simpleJack({ players: 2 })).not.toThrow();
-      expect(typeof simpleJack({ players: 2 })).toBe("string");
+
+      value = simpleJack({ players: 2 });
+
+      expect(typeof value === "string" || value === null).toBe(true);
 
       // null deck
 
       expect(() => simpleJack({ deck: null, players: 2 })).not.toThrow();
-      expect(typeof simpleJack({ deck: null, players: 2 })).toBe("string");
+
+      value = simpleJack({ deck: null, players: 2 });
+
+      expect(typeof value === "string" || value === null).toBe(true);
     });
   });
   describe("Basic game play scenarios.", () => {
