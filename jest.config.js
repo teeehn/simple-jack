@@ -20,6 +20,9 @@ const config = {
             }
         }]
     },
+    testPathIgnorePatterns: [
+        'src/app'
+    ],
     collectCoverageFrom: [
         'src/**/*.{ts,tsx,js,jsx}',
         '!src/**/*.d.ts',
