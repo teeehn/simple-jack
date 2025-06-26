@@ -31,27 +31,27 @@ describe("Simple Jack", () => {
     test("Players must be a number 2 through 6", () => {
       const fullDeck: Card[] = createMockDeck();
 
-      expect(() => simpleJack(fullDeck, 1)).toThrow();
-      expect(() => simpleJack(fullDeck, 7)).toThrow();
+      expect(() => simpleJack({ deck: fullDeck, players: 1 })).toThrow();
+      expect(() => simpleJack({ deck: fullDeck, players: 7 })).toThrow();
       // @ts-expect-error: Missing player argument.
-      expect(() => simpleJack(fullDeck)).toThrow();
+      expect(() => simpleJack({ deck: fullDeck })).toThrow();
       // @ts-expect-error: Player argument as a string.
-      expect(() => simpleJack(fullDeck, "2")).toThrow();
-      expect(() => simpleJack(fullDeck, 5)).not.toThrow();
+      expect(() => simpleJack({ deck: fullDeck, players: "2" })).toThrow();
+      expect(() => simpleJack({ deck: fullDeck, players: 5 })).not.toThrow();
     });
     test("Deck must be an array of length 52", () => {
       const fullDeck: Card[] = createMockDeck();
 
-      expect(() => simpleJack([], 2)).toThrow();
-      expect(() => simpleJack(["Spades-King"], 2)).toThrow();
+      expect(() => simpleJack({ deck: [], players: 2 })).toThrow();
+      expect(() => simpleJack({ deck: ["Spades-King"], players: 2 })).toThrow();
       // @ts-expect-error: Deck is a string instead of array.
-      expect(() => simpleJack("Spades-King", 2)).toThrow();
-      expect(() => simpleJack(fullDeck, 3)).not.toThrow();
+      expect(() => simpleJack({ deck: "Spades-King", players: 2 })).toThrow();
+      expect(() => simpleJack({ deck: fullDeck, players: 3 })).not.toThrow();
     });
     test("Deck must have 52 unique cards.", () => {
       expect(() =>
-        simpleJack(
-          [
+        simpleJack({
+          deck: [
             "Spades-Jack",
             "Spades-Jack",
             "Spades-Ace",
@@ -105,8 +105,8 @@ describe("Simple Jack", () => {
             "Spades-9",
             "Spades-10",
           ],
-          2
-        )
+          players: 2,
+        })
       ).toThrow();
     });
   });
@@ -167,7 +167,7 @@ describe("Simple Jack", () => {
         "Spades-10",
       ];
 
-      expect(simpleJack(deck, 2)).toBe(
+      expect(simpleJack({ deck, players: 2 })).toBe(
         "Winner: 1, Hand: ['Spades-Jack', 'Spades-Ace'], Value: 21"
       );
     });
@@ -227,7 +227,7 @@ describe("Simple Jack", () => {
         "Spades-10",
       ];
 
-      expect(simpleJack(deck, 2)).toBe(
+      expect(simpleJack({ deck, players: 2 })).toBe(
         "Winner: 2, Hand: ['Clubs-7', 'Diamonds-Jack'], Value: 17"
       );
     });
@@ -287,7 +287,7 @@ describe("Simple Jack", () => {
         "Spades-10",
       ];
 
-      expect(simpleJack(deck, 6)).toBe(
+      expect(simpleJack({ deck, players: 6 })).toBe(
         "Winner: 2, Hand: ['Hearts-King', 'Spades-Jack'], Value: 20"
       );
     });
@@ -348,7 +348,7 @@ describe("Simple Jack", () => {
         "Spades-10",
       ];
 
-      expect(simpleJack(deck, 6)).toBe(null);
+      expect(simpleJack({ deck, players: 6 })).toBe(null);
     });
   });
 
@@ -372,7 +372,7 @@ describe("Simple Jack", () => {
         "Diamonds-8",
       ].concat(new Array(52 - 15).fill(" "));
 
-      expect(() => simpleJack(deck as never, 6)).toThrow();
+      expect(() => simpleJack({ deck: deck as never, players: 6 })).toThrow();
     });
 
     test("Duplicate card causes exception", () => {
@@ -394,7 +394,7 @@ describe("Simple Jack", () => {
         "Diamonds-8",
       ].concat(new Array(52 - 15).fill(" "));
 
-      expect(() => simpleJack(deck as never, 6)).toThrow();
+      expect(() => simpleJack({ deck: deck as never, players: 6 })).toThrow();
     });
     test("Multiple Aces in each hand to evaluate. Player 2 wins with 21.", () => {
       const deck: Card[] = [
@@ -452,7 +452,7 @@ describe("Simple Jack", () => {
         "Spades-10",
       ];
 
-      expect(simpleJack(deck, 2)).toBe(
+      expect(simpleJack({ deck, players: 2 })).toBe(
         "Winner: 2, Hand: ['Clubs-Ace', 'Diamonds-Ace', 'Hearts-4', 'Spades-5'], Value: 21"
       );
     });
