@@ -67,7 +67,11 @@ export function generateMockDeck(testCase?: TestCase | null): Card[] {
 
   let testCards: Card[] = [];
 
-  if (Array.isArray(testCase)) {
+  if (testCase === undefined || testCase === null) {
+    // If no testCase is provided, default to an empty array for testCards
+    // to generate a fully randomized deck without errors.
+    testCards = [];
+  } else if (Array.isArray(testCase)) {
     // Handle array format
     testCards = [...testCase];
   } else if (testCase && typeof testCase === "object") {

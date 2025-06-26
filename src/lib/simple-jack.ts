@@ -11,6 +11,9 @@ import {
   SIMPLE_JACK_SCORE,
 } from "@/shared/constants";
 
+// Import the mock deck generator to enable default deck creation.
+import { generateMockDeck } from "../utils/mock-deck-generator";
+
 /**
  * isCardValid - Validates a card based on validation data.
  *  Returns true if the card is valid.
@@ -124,13 +127,19 @@ export function simpleJack(props: {
 }): string | null {
   const { deck, players } = props;
 
+  // If no deck is provided, generate a default randomized deck using generateMockDeck.
+  // This ensures the function can run without requiring a deck argument.
+  let finalDeck = deck;
+  if (!deck) {
+    finalDeck = generateMockDeck();
+  }
+
   // Validate that the number of players is correct.
 
   validatePlayers(players);
 
-  // Validate the deck.
-
-  validateDeck(deck!);
+  // Validate the deck (using finalDeck instead of deck).
+  validateDeck(finalDeck);
 
   function playerCardHand(id: number): PlayerHand {
     const cards: Card[] = [];
@@ -181,12 +190,13 @@ export function simpleJack(props: {
         //  and check if the card is valid.
 
         // Check for an exhausted deck.
-        if (deck!.length <= 0) {
+        if (finalDeck.length <= 0) {
           gameOver = true;
           break;
         }
 
-        const playerCard = validator(deck!.shift()!);
+        // Use finalDeck instead of deck for dealing.
+        const playerCard = validator(finalDeck.shift()!);
 
         // Increment cards dealt on turn.
         cardsDealtOnTurn += 1;
