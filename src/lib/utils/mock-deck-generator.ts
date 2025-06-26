@@ -56,6 +56,16 @@ export function generateMockDeck(testCase?: TestCase | null): Card[] {
     ranks.map((rank): Card => `${suit}-${rank}`)
   );
 
+  // If no test case is provided, return a shuffled full deck
+  if (!testCase) {
+    const shuffledDeck = [...fullDeck];
+    for (let i = shuffledDeck.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffledDeck[i], shuffledDeck[j]] = [shuffledDeck[j], shuffledDeck[i]];
+    }
+    return shuffledDeck;
+  }
+
   // Validate that testCase cards are valid
   const validateCard = (card: unknown): card is Card => {
     if (typeof card !== "string" || card === null) return false;

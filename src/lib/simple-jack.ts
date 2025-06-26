@@ -1,6 +1,7 @@
 "use strict";
 
 import { Card, CardValue, PlayerHand, Suit } from "@/shared/types";
+import { generateMockDeck } from "@/lib/utils/mock-deck-generator";
 
 import {
   validationData,
@@ -125,12 +126,11 @@ export function simpleJack(props: {
   const { deck, players } = props;
 
   // Validate that the number of players is correct.
-
   validatePlayers(players);
 
-  // Validate the deck.
-
-  validateDeck(deck!);
+  // Generate a deck if none is provided, otherwise validate the provided deck
+  const gameDeck = deck ? [...deck] : generateMockDeck();
+  validateDeck(gameDeck);
 
   function playerCardHand(id: number): PlayerHand {
     const cards: Card[] = [];
@@ -181,12 +181,12 @@ export function simpleJack(props: {
         //  and check if the card is valid.
 
         // Check for an exhausted deck.
-        if (deck!.length <= 0) {
+        if (gameDeck.length <= 0) {
           gameOver = true;
           break;
         }
 
-        const playerCard = validator(deck!.shift()!);
+        const playerCard = validator(gameDeck.shift()!);
 
         // Increment cards dealt on turn.
         cardsDealtOnTurn += 1;
