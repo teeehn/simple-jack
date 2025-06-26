@@ -94,6 +94,8 @@ export function generateMockDeck(testCase?: TestCase | null): Card[] {
         }
       }
     }
+  } else if (!testCase) {
+    testCards = [];
   } else {
     throw new Error("testCase must be an array or object");
   }
