@@ -118,14 +118,19 @@ function validateCard(): (testCard: Card) => Card {
   };
 }
 
-export function simpleJack(deck: Card[], players: number): string | null {
+export function simpleJack(props: {
+  deck?: Card[] | null;
+  players: number;
+}): string | null {
+  const { deck, players } = props;
+
   // Validate that the number of players is correct.
 
   validatePlayers(players);
 
   // Validate the deck.
 
-  validateDeck(deck);
+  validateDeck(deck!);
 
   function playerCardHand(id: number): PlayerHand {
     const cards: Card[] = [];
@@ -176,12 +181,12 @@ export function simpleJack(deck: Card[], players: number): string | null {
         //  and check if the card is valid.
 
         // Check for an exhausted deck.
-        if (deck.length <= 0) {
+        if (deck!.length <= 0) {
           gameOver = true;
           break;
         }
 
-        const playerCard = validator(deck.shift()!);
+        const playerCard = validator(deck!.shift()!);
 
         // Increment cards dealt on turn.
         cardsDealtOnTurn += 1;
