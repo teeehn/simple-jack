@@ -42,7 +42,6 @@ describe("Simple Jack", () => {
     test("Deck must be an array of length 52", () => {
       const fullDeck: Card[] = createMockDeck();
 
-      expect(() => simpleJack({ deck: [], players: 2 })).toThrow();
       expect(() => simpleJack({ deck: ["Spades-King"], players: 2 })).toThrow();
       // @ts-expect-error: Deck is a string instead of array.
       expect(() => simpleJack({ deck: "Spades-King", players: 2 })).toThrow();
@@ -108,6 +107,22 @@ describe("Simple Jack", () => {
           players: 2,
         })
       ).toThrow();
+    });
+    test("Deck can be an empty array, undefined, or null.", () => {
+      // empty array deck
+
+      expect(() => simpleJack({ deck: [], players: 2 })).not.toThrow();
+      expect(typeof simpleJack({ deck: [], players: 2 })).toBe("string");
+
+      // undefined deck
+
+      expect(() => simpleJack({ players: 2 })).not.toThrow();
+      expect(typeof simpleJack({ players: 2 })).toBe("string");
+
+      // null deck
+
+      expect(() => simpleJack({ deck: null, players: 2 })).not.toThrow();
+      expect(typeof simpleJack({ deck: null, players: 2 })).toBe("string");
     });
   });
   describe("Basic game play scenarios.", () => {
