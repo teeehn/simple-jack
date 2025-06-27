@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { generateMockDeck } from "@/lib/utils/mock-deck-generator";
 
 interface Card {
   suit: string;
@@ -24,40 +25,6 @@ interface GameState {
   commentary: string[];
   deck: string[];
   isDealing: boolean;
-}
-
-function createDeck(): string[] {
-  const suits = ["Clubs", "Diamonds", "Hearts", "Spades"];
-  const values = [
-    "Ace",
-    "King",
-    "Queen",
-    "Jack",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9",
-    "10",
-  ];
-  const deck: string[] = [];
-
-  suits.forEach((suit) => {
-    values.forEach((value) => {
-      deck.push(`${suit}-${value}`);
-    });
-  });
-
-  // Shuffle the deck
-  for (let i = deck.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [deck[i], deck[j]] = [deck[j], deck[i]];
-  }
-
-  return deck;
 }
 
 function parseCard(cardString: string): Card {
@@ -131,7 +98,7 @@ export default function Home() {
   const [dealingSpeed, setDealingSpeed] = useState<number>(2000);
 
   const startGame = () => {
-    const deck = createDeck();
+    const deck = generateMockDeck();
     const players: PlayerHand[] = [];
 
     for (let i = 0; i < numPlayers; i++) {
