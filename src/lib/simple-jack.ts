@@ -75,7 +75,7 @@ export function validatePlayers(players: number) {
  * @param currentScore {number}
  * @returns {number}
  */
-export function getCardValue(card: Card, currentScore: number): number {
+export function getCardValue(card: Card, currentScore?: number): number {
   if (!card) {
     throw new Error("Card has empty value.");
   }
@@ -86,7 +86,9 @@ export function getCardValue(card: Card, currentScore: number): number {
   } else if (rawValue === "Ace") {
     // Ace can be 11 or 1.
     // Calculates the correct value based on current score.
-    if (currentScore + 11 <= SIMPLE_JACK_SCORE) {
+    if (!currentScore) {
+      return 1;
+    } else if (currentScore + 11 <= SIMPLE_JACK_SCORE) {
       return 11;
     } else {
       return 1;
