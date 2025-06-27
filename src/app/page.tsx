@@ -34,7 +34,12 @@ function calculateHandScore(cards: Card[]): number {
   return score;
 }
 
-function getSuitSymbol(suit: Suit): string {
+function getCardFaceValue(card: Card): CardValue {
+  return card.split("-")[1] as CardValue;
+}
+
+function getSuitSymbol(card: Card): string {
+  const suit = card.split("-")[0] as Suit;
   switch (suit) {
     case "Hearts":
       return "♥";
@@ -49,7 +54,8 @@ function getSuitSymbol(suit: Suit): string {
   }
 }
 
-function getSuitColor(suit: Suit): string {
+function getSuitColor(card: Card): string {
+  const suit = card.split("-")[0] as Suit;
   return suit === "Hearts" || suit === "Diamonds"
     ? "text-red-600"
     : "text-black";
@@ -123,7 +129,7 @@ export default function Home() {
             commentary += `Player ${currentPlayer.playerId} has ${currentPlayer.score} points and must take another card.`;
           }
 
-          newState.commentary.push(commentary);
+          newState.commentary.unshift(commentary);
         }
 
         // Move to next player
@@ -152,7 +158,7 @@ export default function Home() {
               (p) => !p.isEliminated
             );
             if (activePlayers.length === 0) {
-              newState.commentary.push("All players busted! No winner.");
+              newState.commentary.unshift("All players busted! No winner.");
             } else {
               const highestScore = Math.max(
                 ...activePlayers.map((p) => p.score)
@@ -163,11 +169,11 @@ export default function Home() {
 
               if (winners.length === 1) {
                 newState.winner = winners[0].playerId;
-                newState.commentary.push(
+                newState.commentary.unshift(
                   `Player ${winners[0].playerId} wins with ${highestScore} points!`
                 );
               } else {
-                newState.commentary.push(
+                newState.commentary.unshift(
                   `Tie game! Players ${winners
                     .map((w) => w.playerId)
                     .join(", ")} all have ${highestScore} points.`
@@ -315,11 +321,13 @@ export default function Home() {
                   <div
                     key={index}
                     className={`bg-white border-2 border-gray-300 rounded-lg p-2 text-center shadow-sm ${getSuitColor(
-                      card.suit
+                      card
                     )}`}
                   >
-                    <div className="text-lg font-bold">{card.displayValue}</div>
-                    <div className="text-xl">{getSuitSymbol(card.suit)}</div>
+                    <div className="text-lg font-bold">
+                      {getCardFaceValue(card)}
+                    </div>
+                    <div className="text-xl">{getSuitSymbol(card)}</div>
                   </div>
                 ))}
                 {/* Empty card slots */}
