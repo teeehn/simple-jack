@@ -2,12 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { generateMockDeck } from "@/lib/utils/mock-deck-generator";
-
-interface Card {
-  suit: string;
-  value: string;
-  displayValue: string;
-}
+import { Card, CardValue, Suit } from "@/shared/types";
+import { getCardValue } from "@/lib/simple-jack";
 
 interface PlayerHand {
   playerId: number;
@@ -23,55 +19,22 @@ interface GameState {
   gamePhase: "dealing" | "finished";
   winner: number | null;
   commentary: string[];
-  deck: string[];
+  deck: Card[];
   isDealing: boolean;
-}
-
-function parseCard(cardString: string): Card {
-  const [suit, value] = cardString.split("-");
-  let displayValue = value;
-
-  if (value === "Jack" || value === "Queen" || value === "King") {
-    displayValue = value.charAt(0);
-  } else if (value === "Ace") {
-    displayValue = "A";
-  }
-
-  return { suit, value, displayValue };
 }
 
 function calculateHandScore(cards: Card[]): number {
   let score = 0;
-  let aces = 0;
 
-  // First pass: count non-aces and aces
   cards.forEach((card) => {
-    if (card.value === "Ace") {
-      aces++;
-    } else if (
-      card.value === "King" ||
-      card.value === "Queen" ||
-      card.value === "Jack"
-    ) {
-      score += 10;
-    } else {
-      score += parseInt(card.value);
-    }
+    const value = getCardValue(card, score);
+    score += value;
   });
-
-  // Second pass: add aces optimally
-  for (let i = 0; i < aces; i++) {
-    if (score + 11 <= 21) {
-      score += 11;
-    } else {
-      score += 1;
-    }
-  }
 
   return score;
 }
 
-function getSuitSymbol(suit: string): string {
+function getSuitSymbol(suit: Suit): string {
   switch (suit) {
     case "Hearts":
       return "♥";
@@ -86,7 +49,7 @@ function getSuitSymbol(suit: string): string {
   }
 }
 
-function getSuitColor(suit: string): string {
+function getSuitColor(suit: Suit): string {
   return suit === "Hearts" || suit === "Diamonds"
     ? "text-red-600"
     : "text-black";
@@ -140,12 +103,11 @@ export default function Home() {
           !currentPlayer.isEliminated &&
           newState.deck.length > 0
         ) {
-          const cardString = newState.deck.shift()!;
-          const card = parseCard(cardString);
+          const card: Card = newState.deck.shift()!;
           currentPlayer.cards.push(card);
           currentPlayer.score = calculateHandScore(currentPlayer.cards);
-
-          let commentary = `Player ${currentPlayer.playerId} draws ${card.suit}-${card.value}. `;
+          const [suit, value] = card.split("-");
+          let commentary = `Player ${currentPlayer.playerId} draws ${suit}-${value}. `;
 
           if (currentPlayer.score === 21) {
             commentary += `Player ${currentPlayer.playerId} has exactly 21 points and wins!`;
