@@ -75,7 +75,7 @@ export function validatePlayers(players: number) {
  * @param currentScore {number}
  * @returns {number}
  */
-export function getCardValue(card: Card, currentScore: number): number {
+export function getCardValue(card: Card, currentScore?: number): number {
   if (!card) {
     throw new Error("Card has empty value.");
   }
@@ -86,7 +86,9 @@ export function getCardValue(card: Card, currentScore: number): number {
   } else if (rawValue === "Ace") {
     // Ace can be 11 or 1.
     // Calculates the correct value based on current score.
-    if (currentScore + 11 <= SIMPLE_JACK_SCORE) {
+    if (!currentScore) {
+      return 1;
+    } else if (currentScore + 11 <= SIMPLE_JACK_SCORE) {
       return 11;
     } else {
       return 1;
@@ -109,7 +111,7 @@ export function getCardValue(card: Card, currentScore: number): number {
  *
  * @returns {function}
  */
-function validateCard(): (testCard: Card) => Card {
+export function validateCard(): (testCard: Card) => Card {
   const cardsDealt: Card[] = [];
   return function (testCard: Card): Card {
     if (isCardValid(testCard)) {
@@ -117,6 +119,26 @@ function validateCard(): (testCard: Card) => Card {
       return testCard;
     }
     throw new Error("Invalid card dealt");
+  };
+}
+
+export function playerCardHand(id: number): PlayerHand {
+  const cards: Card[] = [];
+  const cardsToString = function (): string {
+    const str = `[${cards.reduce((acc, card, idx, arr) => {
+      if (idx === arr.length - 1) {
+        return acc + "'" + card + "'";
+      } else {
+        return acc + "'" + card + "'" + ", ";
+      }
+    }, "")}]`;
+    return str;
+  };
+  return {
+    cards,
+    cardsToString,
+    playerId: id,
+    score: 0,
   };
 }
 
@@ -140,26 +162,6 @@ export function simpleJack(props: {
   // Validate the deck.
 
   validateDeck(deck!);
-
-  function playerCardHand(id: number): PlayerHand {
-    const cards: Card[] = [];
-    const cardsToString = function (): string {
-      const str = `[${cards.reduce((acc, card, idx, arr) => {
-        if (idx === arr.length - 1) {
-          return acc + "'" + card + "'";
-        } else {
-          return acc + "'" + card + "'" + ", ";
-        }
-      }, "")}]`;
-      return str;
-    };
-    return {
-      cards,
-      cardsToString,
-      playerId: id,
-      score: 0,
-    };
-  }
 
   // Initialize.
   let winner: number | undefined;

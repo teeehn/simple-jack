@@ -21,11 +21,26 @@ export interface ValidationData {
 }
 
 export interface PlayerHand {
-  score: number;
   cards: Card[];
-  playerId?: number;
   cardsToString: () => string;
+  isEliminated?: boolean;
+  playerId?: number;
+  score: number;
 }
 
 export type PlayerHandsMockup = Record<string, Card[]>;
 export type TestCase = Card[] | PlayerHandsMockup;
+
+export interface IGameState {
+  cardsDealtOnTurn: number;
+  commentary: string[] | [];
+  currentPlayerIdx: number;
+  gameDeck?: Card[];
+  gameSummary?: string | null;
+  gameOver: boolean;
+  highScore: number;
+  isEliminated?: boolean;
+  players?: number;
+  playerHands?: PlayerHand[];
+  winner?: number;
+}

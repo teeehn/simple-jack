@@ -3,11 +3,6 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import Home from "../page";
 
-// Mock the simple-jack module since we're testing the UI, not the game logic
-jest.mock("../../lib/simple-jack", () => ({
-  simpleJack: jest.fn(),
-}));
-
 describe("Simple Jack Game UI", () => {
   beforeEach(() => {
     jest.clearAllMocks();
