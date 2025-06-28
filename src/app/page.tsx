@@ -200,11 +200,11 @@ export default function Home() {
             Game Commentary
           </h3>
           <div className="max-h-40 overflow-y-auto space-y-2">
-            {/* {gameState.commentary.map((comment, index) => (
+            {gameState.commentary.map((comment, index) => (
               <div key={index} className="text-gray-700 p-2 bg-gray-50 rounded">
                 {comment}
               </div>
-            ))} */}
+            ))}
           </div>
         </div>
 
