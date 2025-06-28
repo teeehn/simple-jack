@@ -21,8 +21,9 @@ export function useSimpleJackGame() {
   // Initialize the game state.
 
   const [gameState, setGameState] = useState<IGameState>({
-    currentPlayerIdx: 0,
     cardsDealtOnTurn: 0,
+    commentary: [],
+    currentPlayerIdx: 0,
     gameOver: false,
     highScore: 0,
     gameDeck,
@@ -37,8 +38,9 @@ export function useSimpleJackGame() {
     // Reset the game state.
 
     setGameState({
-      currentPlayerIdx: 0,
       cardsDealtOnTurn: 0,
+      commentary: [],
+      currentPlayerIdx: 0,
       gameOver: false,
       highScore: 0,
       gameDeck,
