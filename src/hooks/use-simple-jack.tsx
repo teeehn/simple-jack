@@ -60,16 +60,16 @@ export function useSimpleJackGame() {
       playerHands,
       players,
     } = gameState;
+
     if (!gameOver && playerHands) {
       // Initialize player hand object on first turn.
+
       if (!playerHands[i]) {
         playerHands[i] = playerCardHand(i + 1);
       }
-      if (playerHands[i]?.score < MUST_STAND_SCORE) {
-        // Deal a card
-        //  and check if the card is valid.
 
-        // Check for an exhausted deck.
+      if (playerHands[i]?.score < MUST_STAND_SCORE) {
+        // First check for an exhausted deck.
 
         if (gameDeck!.length <= 0) {
           setGameState({
@@ -77,6 +77,8 @@ export function useSimpleJackGame() {
             gameOver: true,
           });
         } else {
+          // Deal a card.
+
           const playerCard = validator(gameDeck!.shift()!);
 
           playerHands[i].score += getCardValue(
@@ -86,18 +88,56 @@ export function useSimpleJackGame() {
 
           playerHands[i].cards.push(playerCard);
 
+          const nextPlayerIdx = i + 1 < players! ? i + 1 : 0;
+
           setTimeout(
             () =>
               setGameState({
                 ...gameState,
-                // Increment cards on turn.
-                cardsDealtOnTurn: cardsDealtOnTurn + 1,
-                currentPlayerIdx: i + 1 < players! ? i + 1 : 0,
+                // Increment cards on turn or reset.
+                cardsDealtOnTurn:
+                  nextPlayerIdx === 0 ? 0 : cardsDealtOnTurn + 1,
+                currentPlayerIdx: nextPlayerIdx,
                 playerHands,
                 gameDeck,
               }),
             1000
           );
+        }
+      } else {
+        // If the player can't take a hit try the next player if able.
+
+        // Check to see if no cards have been dealt this round.
+
+        const nextPlayerIdx = i + 1 < players! ? i + 1 : 0;
+
+        if (nextPlayerIdx === 0) {
+          // Now back at the first player.
+
+          if (cardsDealtOnTurn === 0) {
+            // If no cards have been dealt in the round end the game.
+
+            setGameState({
+              ...gameState,
+              gameOver: true,
+            });
+          } else {
+            // Deal to the first player.
+
+            setGameState({
+              ...gameState,
+              currentPlayerIdx: nextPlayerIdx,
+              // Reset cardsDealtOnTurn.
+              cardsDealtOnTurn: 0,
+            });
+          }
+        } else {
+          // Deal to the next player.
+
+          setGameState({
+            ...gameState,
+            currentPlayerIdx: nextPlayerIdx,
+          });
         }
       }
     }
