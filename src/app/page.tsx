@@ -65,9 +65,18 @@ export default function Home() {
             <select
               id="numPlayers"
               value={numPlayers}
-              onChange={(e) => setNumPlayers(parseInt(e.target.value))}
+              onChange={(e) => {
+                if (e.target.value) {
+                  setNumPlayers(parseInt(e.target.value));
+                } else {
+                  setNumPlayers(undefined);
+                }
+              }}
               className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
+              <option key={`select`} value={``}>
+                - select -
+              </option>
               {[2, 3, 4, 5, 6].map((num) => (
                 <option key={num} value={num}>
                   {num} Players
