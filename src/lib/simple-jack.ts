@@ -111,7 +111,7 @@ export function getCardValue(card: Card, currentScore?: number): number {
  *
  * @returns {function}
  */
-function validateCard(): (testCard: Card) => Card {
+export function validateCard(): (testCard: Card) => Card {
   const cardsDealt: Card[] = [];
   return function (testCard: Card): Card {
     if (isCardValid(testCard)) {
