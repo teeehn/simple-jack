@@ -122,6 +122,26 @@ function validateCard(): (testCard: Card) => Card {
   };
 }
 
+export function playerCardHand(id: number): PlayerHand {
+  const cards: Card[] = [];
+  const cardsToString = function (): string {
+    const str = `[${cards.reduce((acc, card, idx, arr) => {
+      if (idx === arr.length - 1) {
+        return acc + "'" + card + "'";
+      } else {
+        return acc + "'" + card + "'" + ", ";
+      }
+    }, "")}]`;
+    return str;
+  };
+  return {
+    cards,
+    cardsToString,
+    playerId: id,
+    score: 0,
+  };
+}
+
 export function simpleJack(props: {
   deck?: Card[] | null;
   players: number;
@@ -142,26 +162,6 @@ export function simpleJack(props: {
   // Validate the deck.
 
   validateDeck(deck!);
-
-  function playerCardHand(id: number): PlayerHand {
-    const cards: Card[] = [];
-    const cardsToString = function (): string {
-      const str = `[${cards.reduce((acc, card, idx, arr) => {
-        if (idx === arr.length - 1) {
-          return acc + "'" + card + "'";
-        } else {
-          return acc + "'" + card + "'" + ", ";
-        }
-      }, "")}]`;
-      return str;
-    };
-    return {
-      cards,
-      cardsToString,
-      playerId: id,
-      score: 0,
-    };
-  }
 
   // Initialize.
   let winner: number | undefined;

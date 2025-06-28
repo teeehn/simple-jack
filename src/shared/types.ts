@@ -29,3 +29,14 @@ export interface PlayerHand {
 
 export type PlayerHandsMockup = Record<string, Card[]>;
 export type TestCase = Card[] | PlayerHandsMockup;
+
+export interface IGameState {
+  cardsDealtOnTurn: number;
+  currentPlayerIdx: number;
+  gameDeck: Card[];
+  gameOver: boolean;
+  highScore: number;
+  players: number;
+  playerHands: PlayerHand[];
+  winner?: number;
+}
