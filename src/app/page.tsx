@@ -35,15 +35,13 @@ export default function Home() {
   const [numPlayers, setNumPlayers] = useState<number | undefined>();
   const [dealingSpeed, setDealingSpeed] = useState<number>(2000);
 
-  const { gameState, setGameState } = useSimpleJackGame();
+  const { gameState, resetGame, setGameState } = useSimpleJackGame();
 
   const startGame = (): void =>
     setGameState({
       ...gameState,
       players: numPlayers,
     });
-
-  const resetGame = () => false;
 
   // Auto-deal cards when in dealing phase
 

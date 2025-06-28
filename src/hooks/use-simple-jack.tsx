@@ -28,6 +28,23 @@ export function useSimpleJackGame() {
     gameDeck,
   });
 
+  const resetGame = () => {
+    // Generate and validate a new deck.
+
+    const gameDeck = generateDeck();
+    validateDeck(gameDeck);
+
+    // Reset the game state.
+
+    setGameState({
+      currentPlayerIdx: 0,
+      cardsDealtOnTurn: 0,
+      gameOver: false,
+      highScore: 0,
+      gameDeck,
+    });
+  };
+
   // Initialize the card deal validator.
 
   const validator = validateCard();
@@ -203,6 +220,7 @@ export function useSimpleJackGame() {
 
   return {
     gameState,
+    resetGame,
     setGameState,
   };
 }
