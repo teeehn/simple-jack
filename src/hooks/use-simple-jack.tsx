@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-import { Card, IGameState, PlayerHand } from "@/shared/types";
+import { IGameState, PlayerHand } from "@/shared/types";
 import {
   //   playerCardHand,
   //   validateCard,
@@ -9,24 +9,12 @@ import {
 } from "@/lib/simple-jack";
 import { generateMockDeck as generateDeck } from "@/lib/utils/mock-deck-generator";
 
-export function useSimpleJackGame(
-  numberOfPlayers: number,
-  deck?: Card[] | null
-) {
-  // Validate that the number of players is correct.
-
-  validatePlayers(numberOfPlayers);
-
-  const gameDeck =
-    !deck || (Array.isArray(deck) && deck.length === 0) ? generateDeck() : deck;
+export function useSimpleJackGame() {
+  const gameDeck = generateDeck();
 
   // Validate the deck.
 
   validateDeck(gameDeck);
-
-  // Store the players' hands.
-
-  const playerHands: PlayerHand[] = new Array(numberOfPlayers);
 
   // Initialize the game state.
 
@@ -35,10 +23,27 @@ export function useSimpleJackGame(
     cardsDealtOnTurn: 0,
     gameOver: false,
     highScore: 0,
-    players: numberOfPlayers,
     gameDeck,
-    playerHands,
   });
+
+  useEffect(() => {
+    // This will initialize the game when the number of players is passed.
+    if (gameState.players) {
+      // Validate number of players
+
+      validatePlayers(gameState.players);
+
+      // Store the players' hands.
+
+      const playerHands: PlayerHand[] = new Array(gameState.players);
+
+      setGameState({
+        ...gameState,
+        playerHands,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gameState.players]);
 
   return {
     gameState,

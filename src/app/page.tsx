@@ -1,38 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { generateMockDeck } from "@/lib/utils/mock-deck-generator";
+import { useState } from "react";
 import { Card, CardValue, Suit } from "@/shared/types";
-import { getCardValue } from "@/lib/simple-jack";
-
-interface PlayerHand {
-  playerId: number;
-  cards: Card[];
-  score: number;
-  isEliminated: boolean;
-  canDraw: boolean;
-}
-
-interface GameState {
-  players: PlayerHand[];
-  currentPlayerIndex: number;
-  gamePhase: "dealing" | "finished";
-  winner: number | null;
-  commentary: string[];
-  deck: Card[];
-  isDealing: boolean;
-}
-
-function calculateHandScore(cards: Card[]): number {
-  let score = 0;
-
-  cards.forEach((card) => {
-    const value = getCardValue(card, score);
-    score += value;
-  });
-
-  return score;
-}
+import { useSimpleJackGame } from "@/hooks/use-simple-jack";
 
 function getCardFaceValue(card: Card): CardValue {
   return card.split("-")[1] as CardValue;
@@ -62,153 +32,22 @@ function getSuitColor(card: Card): string {
 }
 
 export default function Home() {
-  const [numPlayers, setNumPlayers] = useState<number>(2);
-  const [gameState, setGameState] = useState<GameState | null>(null);
+  const [numPlayers, setNumPlayers] = useState<number | undefined>();
   const [dealingSpeed, setDealingSpeed] = useState<number>(2000);
 
-  const startGame = () => {
-    const deck = generateMockDeck();
-    const players: PlayerHand[] = [];
+  const { gameState, setGameState } = useSimpleJackGame();
 
-    for (let i = 0; i < numPlayers; i++) {
-      players.push({
-        playerId: i + 1,
-        cards: [],
-        score: 0,
-        isEliminated: false,
-        canDraw: true,
-      });
-    }
-
+  const startGame = (): void =>
     setGameState({
-      players,
-      currentPlayerIndex: 0,
-      gamePhase: "dealing",
-      winner: null,
-      commentary: ["Game started! Dealing cards..."],
-      deck,
-      isDealing: false,
+      ...gameState,
+      players: numPlayers,
     });
-  };
 
-  const dealNextCard = () => {
-    if (!gameState || gameState.gamePhase === "finished") return;
-
-    setGameState({ ...gameState, isDealing: true });
-
-    setTimeout(() => {
-      setGameState((prev) => {
-        if (!prev) return null;
-
-        const newState = { ...prev };
-        const currentPlayer = newState.players[newState.currentPlayerIndex];
-
-        // Check if current player needs a card
-        if (
-          currentPlayer.score < 17 &&
-          !currentPlayer.isEliminated &&
-          newState.deck.length > 0
-        ) {
-          const card: Card = newState.deck.shift()!;
-          currentPlayer.cards.push(card);
-          currentPlayer.score = calculateHandScore(currentPlayer.cards);
-          const [suit, value] = card.split("-");
-          let commentary = `Player ${currentPlayer.playerId} draws ${suit}-${value}. `;
-
-          if (currentPlayer.score === 21) {
-            commentary += `Player ${currentPlayer.playerId} has exactly 21 points and wins!`;
-            newState.winner = currentPlayer.playerId;
-            newState.gamePhase = "finished";
-          } else if (currentPlayer.score > 21) {
-            commentary += `Player ${currentPlayer.playerId} busts with ${currentPlayer.score} points and is eliminated.`;
-            currentPlayer.isEliminated = true;
-          } else if (currentPlayer.score >= 17) {
-            commentary += `Player ${currentPlayer.playerId} has ${currentPlayer.score} points and must stand.`;
-            currentPlayer.canDraw = false;
-          } else {
-            commentary += `Player ${currentPlayer.playerId} has ${currentPlayer.score} points and must take another card.`;
-          }
-
-          newState.commentary.unshift(commentary);
-        }
-
-        // Move to next player
-        let nextPlayerIndex =
-          (newState.currentPlayerIndex + 1) % newState.players.length;
-        let foundPlayerNeedingCard = false;
-
-        // Check if any player still needs cards
-        for (let i = 0; i < newState.players.length; i++) {
-          const player = newState.players[nextPlayerIndex];
-          if (player.score < 17 && !player.isEliminated) {
-            foundPlayerNeedingCard = true;
-            break;
-          }
-          nextPlayerIndex = (nextPlayerIndex + 1) % newState.players.length;
-        }
-
-        if (
-          !foundPlayerNeedingCard ||
-          newState.deck.length === 0 ||
-          newState.winner
-        ) {
-          // Game over - determine winner
-          if (!newState.winner) {
-            const activePlayers = newState.players.filter(
-              (p) => !p.isEliminated
-            );
-            if (activePlayers.length === 0) {
-              newState.commentary.unshift("All players busted! No winner.");
-            } else {
-              const highestScore = Math.max(
-                ...activePlayers.map((p) => p.score)
-              );
-              const winners = activePlayers.filter(
-                (p) => p.score === highestScore
-              );
-
-              if (winners.length === 1) {
-                newState.winner = winners[0].playerId;
-                newState.commentary.unshift(
-                  `Player ${winners[0].playerId} wins with ${highestScore} points!`
-                );
-              } else {
-                newState.commentary.unshift(
-                  `Tie game! Players ${winners
-                    .map((w) => w.playerId)
-                    .join(", ")} all have ${highestScore} points.`
-                );
-              }
-            }
-          }
-          newState.gamePhase = "finished";
-        } else {
-          newState.currentPlayerIndex = nextPlayerIndex;
-        }
-
-        return { ...newState, isDealing: false };
-      });
-    }, dealingSpeed);
-  };
-
-  const resetGame = () => {
-    setGameState(null);
-  };
+  const resetGame = () => false;
 
   // Auto-deal cards when in dealing phase
-  useEffect(() => {
-    if (gameState?.gamePhase === "dealing" && !gameState.isDealing) {
-      const timer = setTimeout(dealNextCard, 500);
-      return () => clearTimeout(timer);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    gameState?.gamePhase,
-    gameState?.isDealing,
-    gameState?.currentPlayerIndex,
-  ]);
 
-  if (!gameState) {
+  if (!gameState.players) {
     return (
       <div className="min-h-screen bg-green-800 flex items-center justify-center">
         <div className="bg-white rounded-lg shadow-2xl p-8 max-w-md w-full">
@@ -273,75 +112,80 @@ export default function Home() {
         <div className="text-center mb-6">
           <h1 className="text-4xl font-bold text-white mb-2">Simple Jack</h1>
           <div className="text-white text-lg">
-            {gameState.gamePhase === "dealing" && (
+            {!gameState.gameOver && (
               <span>
                 Dealing cards... Current player:{" "}
-                {gameState.currentPlayerIndex + 1}
+                {gameState.currentPlayerIdx + 1}
               </span>
             )}
-            {gameState.gamePhase === "finished" && <span>Game Complete!</span>}
+            {gameState.gameOver && <span>Game Complete!</span>}
           </div>
         </div>
 
         {/* Players Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {gameState.players.map((player) => (
-            <div
-              key={player.playerId}
-              className={`bg-white rounded-lg p-6 shadow-lg ${
-                gameState.currentPlayerIndex === player.playerId - 1 &&
-                gameState.gamePhase === "dealing"
-                  ? "ring-4 ring-yellow-400"
-                  : ""
-              } ${player.isEliminated ? "opacity-50" : ""} ${
-                gameState.winner === player.playerId
-                  ? "ring-4 ring-green-500"
-                  : ""
-              }`}
-            >
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-bold text-gray-800">
-                  Player {player.playerId}
-                </h3>
-                <div className="text-right">
-                  <div className="text-2xl font-bold text-gray-800">
-                    {player.score}
-                  </div>
-                  {player.isEliminated && (
+          {gameState.playerHands &&
+            gameState.playerHands!.map((player) => (
+              <div
+                key={player.playerId}
+                className={`bg-white rounded-lg p-6 shadow-lg`}
+                //  ${
+                //   gameState.currentPlayerIdx === player.playerId! - 1 &&
+                //   !gameState.gameOver
+                //     ? "ring-4 ring-yellow-400"
+                //     : ""
+                // } ${player.isEliminated ? "opacity-50" : ""} ${
+                //   gameState.winner === player.playerId
+                //     ? "ring-4 ring-green-500"
+                //     : ""
+                // }`
+                // }
+              >
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-xl font-bold text-gray-800">
+                    Player {player.playerId}
+                  </h3>
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-gray-800">
+                      {player.score}
+                    </div>
+                    {/* {player.isEliminated && (
                     <div className="text-red-600 font-semibold">BUST</div>
-                  )}
-                  {gameState.winner === player.playerId && (
-                    <div className="text-green-600 font-semibold">WINNER!</div>
-                  )}
+                  )} */}
+                    {gameState.winner === player.playerId && (
+                      <div className="text-green-600 font-semibold">
+                        WINNER!
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-4 gap-2">
+                  {player.cards.map((card, index) => (
+                    <div
+                      key={index}
+                      className={`bg-white border-2 border-gray-300 rounded-lg p-2 text-center shadow-sm ${getSuitColor(
+                        card
+                      )}`}
+                    >
+                      <div className="text-lg font-bold">
+                        {getCardFaceValue(card)}
+                      </div>
+                      <div className="text-xl">{getSuitSymbol(card)}</div>
+                    </div>
+                  ))}
+                  {/* Empty card slots */}
+                  {Array.from({
+                    length: Math.max(0, 6 - player.cards.length),
+                  }).map((_, index) => (
+                    <div
+                      key={`empty-${index}`}
+                      className="bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg p-2 h-16"
+                    />
+                  ))}
                 </div>
               </div>
-
-              <div className="grid grid-cols-4 gap-2">
-                {player.cards.map((card, index) => (
-                  <div
-                    key={index}
-                    className={`bg-white border-2 border-gray-300 rounded-lg p-2 text-center shadow-sm ${getSuitColor(
-                      card
-                    )}`}
-                  >
-                    <div className="text-lg font-bold">
-                      {getCardFaceValue(card)}
-                    </div>
-                    <div className="text-xl">{getSuitSymbol(card)}</div>
-                  </div>
-                ))}
-                {/* Empty card slots */}
-                {Array.from({
-                  length: Math.max(0, 6 - player.cards.length),
-                }).map((_, index) => (
-                  <div
-                    key={`empty-${index}`}
-                    className="bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg p-2 h-16"
-                  />
-                ))}
-              </div>
-            </div>
-          ))}
+            ))}
         </div>
 
         {/* Commentary */}
@@ -350,16 +194,16 @@ export default function Home() {
             Game Commentary
           </h3>
           <div className="max-h-40 overflow-y-auto space-y-2">
-            {gameState.commentary.map((comment, index) => (
+            {/* {gameState.commentary.map((comment, index) => (
               <div key={index} className="text-gray-700 p-2 bg-gray-50 rounded">
                 {comment}
               </div>
-            ))}
+            ))} */}
           </div>
         </div>
 
         {/* Game Controls */}
-        {gameState.gamePhase === "finished" && (
+        {gameState.gameOver && (
           <div className="text-center">
             <button
               onClick={resetGame}

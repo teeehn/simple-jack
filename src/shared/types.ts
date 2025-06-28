@@ -33,10 +33,10 @@ export type TestCase = Card[] | PlayerHandsMockup;
 export interface IGameState {
   cardsDealtOnTurn: number;
   currentPlayerIdx: number;
-  gameDeck: Card[];
+  gameDeck?: Card[];
   gameOver: boolean;
   highScore: number;
-  players: number;
-  playerHands: PlayerHand[];
+  players?: number;
+  playerHands?: PlayerHand[];
   winner?: number;
 }
