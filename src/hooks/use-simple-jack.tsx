@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { IGameState, PlayerHand } from "@/shared/types";
-import { MUST_STAND_SCORE } from "@/shared/constants";
+import { MUST_STAND_SCORE, SIMPLE_JACK_SCORE } from "@/shared/constants";
 import {
   getCardValue,
   playerCardHand,
@@ -57,8 +57,10 @@ export function useSimpleJackGame() {
       currentPlayerIdx: i,
       gameDeck,
       gameOver,
+      highScore,
       playerHands,
       players,
+      winner,
     } = gameState;
 
     if (!gameOver && playerHands) {
@@ -90,19 +92,55 @@ export function useSimpleJackGame() {
 
           const nextPlayerIdx = i + 1 < players! ? i + 1 : 0;
 
-          setTimeout(
-            () =>
-              setGameState({
-                ...gameState,
-                // Increment cards on turn or reset.
-                cardsDealtOnTurn:
-                  nextPlayerIdx === 0 ? 0 : cardsDealtOnTurn + 1,
-                currentPlayerIdx: nextPlayerIdx,
-                playerHands,
-                gameDeck,
-              }),
-            1000
-          );
+          // Check for winner and update highScore
+
+          if (playerHands[i].score === SIMPLE_JACK_SCORE) {
+            // End the game and set the winner.
+
+            setTimeout(
+              () =>
+                setGameState({
+                  ...gameState,
+                  gameOver: true,
+                  highScore: SIMPLE_JACK_SCORE,
+                  playerHands,
+                  winner: playerHands[i].playerId,
+                }),
+              1000
+            );
+          } else if (playerHands[i].score < SIMPLE_JACK_SCORE) {
+            setTimeout(
+              () =>
+                setGameState({
+                  ...gameState,
+                  // Increment cards on turn or reset.
+                  cardsDealtOnTurn:
+                    nextPlayerIdx === 0 ? 0 : cardsDealtOnTurn + 1,
+                  currentPlayerIdx: nextPlayerIdx,
+                  highScore:
+                    playerHands[i].score > highScore
+                      ? playerHands[i].score
+                      : highScore,
+                  playerHands,
+                  gameDeck,
+                }),
+              1000
+            );
+          } else {
+            setTimeout(
+              () =>
+                setGameState({
+                  ...gameState,
+                  // Increment cards on turn or reset.
+                  cardsDealtOnTurn:
+                    nextPlayerIdx === 0 ? 0 : cardsDealtOnTurn + 1,
+                  currentPlayerIdx: nextPlayerIdx,
+                  playerHands,
+                  gameDeck,
+                }),
+              1000
+            );
+          }
         }
       } else {
         // If the player can't take a hit try the next player if able.
@@ -139,6 +177,25 @@ export function useSimpleJackGame() {
             currentPlayerIdx: nextPlayerIdx,
           });
         }
+      }
+    }
+
+    if (gameOver && playerHands && !winner) {
+      const highScores = playerHands.filter((hand) => hand.score === highScore);
+      if (highScores.length === 1) {
+        // We have a winner.
+
+        setGameState({
+          ...gameState,
+          winner: highScores[0].playerId,
+        });
+      } else {
+        // Push
+
+        setGameState({
+          ...gameState,
+          winner: -1,
+        });
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
