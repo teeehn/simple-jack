@@ -36,6 +36,7 @@ export interface IGameState {
   commentary: string[] | [];
   currentPlayerIdx: number;
   gameDeck?: Card[];
+  gameSummary?: string | null;
   gameOver: boolean;
   highScore: number;
   isEliminated?: boolean;
