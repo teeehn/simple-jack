@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { IGameState, PlayerHand } from "@/shared/types";
+import { Card, IGameState, PlayerHand } from "@/shared/types";
 import { MUST_STAND_SCORE, SIMPLE_JACK_SCORE } from "@/shared/constants";
 import {
   getCardValue,
@@ -10,6 +10,7 @@ import {
   validatePlayers,
 } from "@/lib/simple-jack";
 import { generateMockDeck as generateDeck } from "@/lib/utils/mock-deck-generator";
+import { gameCommentary } from "@/lib/utils/game-commentary";
 
 export function useSimpleJackGame() {
   const gameDeck = generateDeck();
@@ -73,6 +74,7 @@ export function useSimpleJackGame() {
   useEffect(() => {
     const {
       cardsDealtOnTurn,
+      commentary,
       currentPlayerIdx: i,
       gameDeck,
       gameOver,
@@ -95,12 +97,13 @@ export function useSimpleJackGame() {
         if (gameDeck!.length <= 0) {
           setGameState({
             ...gameState,
+            commentary,
             gameOver: true,
           });
         } else {
           // Deal a card.
 
-          const playerCard = validator(gameDeck!.shift()!);
+          const playerCard: Card = validator(gameDeck!.shift()!);
 
           playerHands[i].score += getCardValue(
             playerCard,
@@ -109,6 +112,13 @@ export function useSimpleJackGame() {
 
           playerHands[i].cards.push(playerCard);
 
+          commentary.unshift(
+            gameCommentary.playerDraws(
+              playerHands[i]?.playerId as number,
+              playerCard
+            )
+          );
+
           const nextPlayerIdx = i + 1 < players! ? i + 1 : 0;
 
           // Check for winner and update highScore
@@ -116,10 +126,15 @@ export function useSimpleJackGame() {
           if (playerHands[i].score === SIMPLE_JACK_SCORE) {
             // End the game and set the winner.
 
+            commentary.unshift(
+              gameCommentary.player21(playerHands[i]?.playerId as number)
+            );
+
             setTimeout(
               () =>
                 setGameState({
                   ...gameState,
+                  commentary,
                   gameOver: true,
                   highScore: SIMPLE_JACK_SCORE,
                   playerHands,
@@ -128,6 +143,13 @@ export function useSimpleJackGame() {
               1000
             );
           } else if (playerHands[i].score < SIMPLE_JACK_SCORE) {
+            // commentary.unshift(
+            //   gameCommentary.playerMustDraw(
+            //     playerHands[i].playerId as number,
+            //     playerHands[i].score
+            //   )
+            // );
+
             setTimeout(
               () =>
                 setGameState({
@@ -135,6 +157,7 @@ export function useSimpleJackGame() {
                   // Increment cards on turn or reset.
                   cardsDealtOnTurn:
                     nextPlayerIdx === 0 ? 0 : cardsDealtOnTurn + 1,
+                  commentary,
                   currentPlayerIdx: nextPlayerIdx,
                   highScore:
                     playerHands[i].score > highScore
@@ -150,6 +173,13 @@ export function useSimpleJackGame() {
 
             playerHands[i].isEliminated = true;
 
+            // commentary.unshift(
+            //   gameCommentary.playerBusts(
+            //     playerHands[i].playerId as number,
+            //     playerHands[i].score
+            //   )
+            // );
+
             setTimeout(
               () =>
                 setGameState({
@@ -157,6 +187,7 @@ export function useSimpleJackGame() {
                   // Increment cards on turn or reset.
                   cardsDealtOnTurn:
                     nextPlayerIdx === 0 ? 0 : cardsDealtOnTurn + 1,
+                  commentary,
                   currentPlayerIdx: nextPlayerIdx,
                   playerHands,
                   gameDeck,
@@ -167,6 +198,13 @@ export function useSimpleJackGame() {
         }
       } else {
         // If the player can't take a hit try the next player if able.
+
+        // commentary.unshift(
+        //   gameCommentary.playerMustStand(
+        //     playerHands[i].playerId as number,
+        //     playerHands[i].score
+        //   )
+        // );
 
         // Check to see if no cards have been dealt this round.
 
@@ -180,6 +218,7 @@ export function useSimpleJackGame() {
 
             setGameState({
               ...gameState,
+              commentary,
               gameOver: true,
             });
           } else {
@@ -187,9 +226,10 @@ export function useSimpleJackGame() {
 
             setGameState({
               ...gameState,
-              currentPlayerIdx: nextPlayerIdx,
               // Reset cardsDealtOnTurn.
               cardsDealtOnTurn: 0,
+              commentary,
+              currentPlayerIdx: nextPlayerIdx,
             });
           }
         } else {
@@ -197,6 +237,7 @@ export function useSimpleJackGame() {
 
           setGameState({
             ...gameState,
+            commentary,
             currentPlayerIdx: nextPlayerIdx,
           });
         }
@@ -208,15 +249,26 @@ export function useSimpleJackGame() {
       if (highScores.length === 1) {
         // We have a winner.
 
+        commentary.unshift(
+          gameCommentary.playerWinsHighestScore(
+            highScores[0].playerId as number,
+            highScores[0].score
+          )
+        );
+
         setGameState({
           ...gameState,
+          commentary,
           winner: highScores[0].playerId,
         });
       } else {
         // Push
 
+        // TODO: Add commentary here.
+
         setGameState({
           ...gameState,
+          commentary,
           winner: -1,
         });
       }
