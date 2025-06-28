@@ -144,6 +144,10 @@ export function useSimpleJackGame() {
               1000
             );
           } else {
+            // Player busts.
+
+            playerHands[i].isEliminated = true;
+
             setTimeout(
               () =>
                 setGameState({

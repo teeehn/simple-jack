@@ -135,18 +135,17 @@ export default function Home() {
             gameState.playerHands!.map((player) => (
               <div
                 key={player.playerId}
-                className={`bg-white rounded-lg p-6 shadow-lg`}
-                //  ${
-                //   gameState.currentPlayerIdx === player.playerId! - 1 &&
-                //   !gameState.gameOver
-                //     ? "ring-4 ring-yellow-400"
-                //     : ""
-                // } ${player.isEliminated ? "opacity-50" : ""} ${
-                //   gameState.winner === player.playerId
-                //     ? "ring-4 ring-green-500"
-                //     : ""
-                // }`
-                // }
+                className={`bg-white rounded-lg p-6 shadow-lg
+                 ${
+                   gameState.currentPlayerIdx === player.playerId! - 1 &&
+                   !gameState.gameOver
+                     ? "ring-4 ring-yellow-400"
+                     : ""
+                 } ${player.isEliminated ? "opacity-50" : ""} ${
+                  gameState.winner === player.playerId
+                    ? "ring-4 ring-green-500"
+                    : ""
+                }`}
               >
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-xl font-bold text-gray-800">
@@ -156,9 +155,9 @@ export default function Home() {
                     <div className="text-2xl font-bold text-gray-800">
                       {player.score}
                     </div>
-                    {/* {player.isEliminated && (
-                    <div className="text-red-600 font-semibold">BUST</div>
-                  )} */}
+                    {player.isEliminated && (
+                      <div className="text-red-600 font-semibold">BUST</div>
+                    )}
                     {gameState.winner === player.playerId && (
                       <div className="text-green-600 font-semibold">
                         WINNER!
