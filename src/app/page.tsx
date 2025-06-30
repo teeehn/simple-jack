@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Card, Suit } from "@/shared/types";
+import { Card } from "@/shared/types";
 import { useSimpleJackGame } from "@/hooks/use-simple-jack";
 import { getCardParts } from "@/lib/utils";
 
