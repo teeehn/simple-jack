@@ -1,6 +1,7 @@
 "use strict";
 
 import { Card, CardValue, Suit, TestCase } from "@/shared/types";
+import { getCardParts } from "./get-card-parts";
 
 /**
  * Creates a test deck of 52 unique strings which represent
@@ -59,10 +60,8 @@ export function generateMockDeck(testCase?: TestCase | null): Card[] {
   // Validate that testCase cards are valid
   const validateCard = (card: unknown): card is Card => {
     if (typeof card !== "string" || card === null) return false;
-    const parts = card.split("-");
-    if (parts.length !== 2) return false;
-    const [suit, rank] = parts;
-    return suits.includes(suit as Suit) && ranks.includes(rank as CardValue);
+    const { suit, value: rank } = getCardParts(card as Card);
+    return suits.includes(suit) && ranks.includes(rank);
   };
 
   let testCards: Card[] = [];

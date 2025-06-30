@@ -9,8 +9,7 @@ import {
   validateDeck,
   validatePlayers,
 } from "@/lib/simple-jack";
-import { generateMockDeck as generateDeck } from "@/lib/utils/mock-deck-generator";
-import { gameCommentary } from "@/lib/utils/game-commentary";
+import { gameCommentary, generateMockDeck as generateDeck } from "@/lib/utils";
 
 export function useSimpleJackGame() {
   const gameDeck = generateDeck();

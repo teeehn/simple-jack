@@ -23,7 +23,7 @@ function getSuitSymbol(card: Card): string {
 }
 
 function getSuitColor(card: Card): string {
-  const suit = card.split("-")[0] as Suit;
+  const suit = getCardParts(card).suit;
   return suit === "Hearts" || suit === "Diamonds"
     ? "text-red-600"
     : "text-black";
