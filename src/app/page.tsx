@@ -1,15 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardValue, Suit } from "@/shared/types";
-import { useSimpleJackGame } from "@/hooks/use-simple-jack";
 
-function getCardFaceValue(card: Card): CardValue {
-  return card.split("-")[1] as CardValue;
-}
+import { Card, Suit } from "@/shared/types";
+import { useSimpleJackGame } from "@/hooks/use-simple-jack";
+import { getCardParts } from "@/lib/utils";
 
 function getSuitSymbol(card: Card): string {
-  const suit = card.split("-")[0] as Suit;
+  const suit = getCardParts(card).suit;
   switch (suit) {
     case "Hearts":
       return "♥";
@@ -175,7 +173,7 @@ export default function Home() {
                       )}`}
                     >
                       <div className="text-lg font-bold">
-                        {getCardFaceValue(card)}
+                        {getCardParts(card).value}
                       </div>
                       <div className="text-xl">{getSuitSymbol(card)}</div>
                     </div>
