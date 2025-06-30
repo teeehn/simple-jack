@@ -44,3 +44,8 @@ export interface IGameState {
   playerHands?: PlayerHand[];
   winner?: number;
 }
+
+export interface IGameProps {
+  deck?: Card[];
+  players?: number;
+}

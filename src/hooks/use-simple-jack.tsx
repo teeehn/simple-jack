@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { Card, IGameState, PlayerHand } from "@/shared/types";
+import { Card, IGameProps, IGameState, PlayerHand } from "@/shared/types";
 import { MUST_STAND_SCORE, SIMPLE_JACK_SCORE } from "@/shared/constants";
 import {
   getCardValue,
@@ -9,10 +9,14 @@ import {
   validateDeck,
   validatePlayers,
 } from "@/lib/simple-jack";
-import { gameCommentary, generateMockDeck as generateDeck } from "@/lib/utils";
+import {
+  createGameSummary,
+  gameCommentary,
+  generateMockDeck as generateDeck,
+} from "@/lib/utils";
 
-export function useSimpleJackGame() {
-  const gameDeck = generateDeck();
+export function useSimpleJackGame(props?: IGameProps) {
+  const gameDeck = props?.deck ? props.deck : generateDeck();
 
   // Validate the deck.
 
@@ -26,6 +30,7 @@ export function useSimpleJackGame() {
     currentPlayerIdx: 0,
     gameOver: false,
     highScore: 0,
+    players: props?.players,
     gameDeck,
   });
 
@@ -94,11 +99,13 @@ export function useSimpleJackGame() {
         // First check for an exhausted deck.
 
         if (gameDeck!.length <= 0) {
-          setGameState({
-            ...gameState,
-            commentary,
-            gameOver: true,
-          });
+          setGameState(
+            createGameSummary({
+              ...gameState,
+              commentary,
+              gameOver: true,
+            })
+          );
         } else {
           // Deal a card.
 
@@ -131,14 +138,16 @@ export function useSimpleJackGame() {
 
             setTimeout(
               () =>
-                setGameState({
-                  ...gameState,
-                  commentary,
-                  gameOver: true,
-                  highScore: SIMPLE_JACK_SCORE,
-                  playerHands,
-                  winner: playerHands[i].playerId,
-                }),
+                setGameState(
+                  createGameSummary({
+                    ...gameState,
+                    commentary,
+                    gameOver: true,
+                    highScore: SIMPLE_JACK_SCORE,
+                    playerHands,
+                    winner: playerHands[i].playerId,
+                  })
+                ),
               1000
             );
           } else if (playerHands[i].score < SIMPLE_JACK_SCORE) {
@@ -255,21 +264,25 @@ export function useSimpleJackGame() {
           )
         );
 
-        setGameState({
-          ...gameState,
-          commentary,
-          winner: highScores[0].playerId,
-        });
+        setGameState(
+          createGameSummary({
+            ...gameState,
+            commentary,
+            winner: highScores[0].playerId,
+          })
+        );
       } else {
         // Push
 
         // TODO: Add commentary here.
 
-        setGameState({
-          ...gameState,
-          commentary,
-          winner: -1,
-        });
+        setGameState(
+          createGameSummary({
+            ...gameState,
+            commentary,
+            winner: -1,
+          })
+        );
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
