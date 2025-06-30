@@ -1,30 +1,6 @@
 import { simpleJack } from "./simple-jack";
-import { Card, Suit, CardValue } from "@/shared/types";
-
-const createMockDeck = (): Card[] => {
-  const deck: Card[] = (["Clubs", "Diamonds", "Hearts", "Spades"] as Suit[])
-    .map((suit: Suit) => {
-      return (
-        [
-          "Ace",
-          "King",
-          "Queen",
-          "Jack",
-          "2",
-          "3",
-          "4",
-          "5",
-          "6",
-          "7",
-          "8",
-          "9",
-          "10",
-        ] as CardValue[]
-      ).map((value: CardValue): Card => `${suit}-${value}`);
-    })
-    .flat();
-  return deck;
-};
+import { Card } from "@/shared/types";
+import { generateMockDeck as createMockDeck } from "./utils";
 
 describe("Simple Jack", () => {
   describe("Basic validations.", () => {
