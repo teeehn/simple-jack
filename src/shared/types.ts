@@ -56,3 +56,5 @@ export interface IGameProps {
   deck?: Card[];
   players?: number;
 }
+
+export type CardValueNotAce = Exclude<CardValue, "Ace">;
