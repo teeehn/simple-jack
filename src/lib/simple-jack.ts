@@ -1,6 +1,6 @@
 "use strict";
 
-import { generateMockDeck as generateDeck } from "@/lib/utils/mock-deck-generator";
+import { generateMockDeck as generateDeck, getCardParts } from "@/lib/utils";
 
 import { Card, CardValue, PlayerHand, Suit } from "@/shared/types";
 
@@ -22,7 +22,7 @@ import {
  * @returns boolean
  */
 export function isCardValid(testCard: Card): boolean {
-  const [suit, value] = testCard.split("-");
+  const { suit, value } = getCardParts(testCard);
   if (
     !validationData.suits[suit as Suit] ||
     !validationData.values[value as CardValue]
@@ -79,8 +79,7 @@ export function getCardValue(card: Card, currentScore?: number): number {
   if (!card) {
     throw new Error("Card has empty value.");
   }
-  const cardPartArr = card.split("-");
-  const rawValue = cardPartArr[1];
+  const rawValue = getCardParts(card).value;
   if (rawValue === "King" || rawValue === "Queen" || rawValue === "Jack") {
     return 10;
   } else if (rawValue === "Ace") {

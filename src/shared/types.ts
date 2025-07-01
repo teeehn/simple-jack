@@ -33,7 +33,7 @@ export type TestCase = Card[] | PlayerHandsMockup;
 
 export interface IGameState {
   cardsDealtOnTurn: number;
-  commentary: string[] | [];
+  commentary: string[];
   currentPlayerIdx: number;
   gameDeck?: Card[];
   gameSummary?: string | null;
@@ -43,4 +43,9 @@ export interface IGameState {
   players?: number;
   playerHands?: PlayerHand[];
   winner?: number;
+}
+
+export interface IGameProps {
+  deck?: Card[];
+  players?: number;
 }
