@@ -31,11 +31,17 @@ export interface PlayerHand {
 export type PlayerHandsMockup = Record<string, Card[]>;
 export type TestCase = Card[] | PlayerHandsMockup;
 
+export enum EDealingSpeed {
+  slow = 3000,
+  normal = 2000,
+  fast = 1000,
+}
+
 export interface IGameState {
   cardsDealtOnTurn: number;
   commentary: string[];
   currentPlayerIdx: number;
-  dealingSpeed?: number;
+  dealingSpeed?: EDealingSpeed;
   gameDeck?: Card[];
   gameSummary?: string | null;
   gameOver: boolean;

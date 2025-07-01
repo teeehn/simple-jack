@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Card } from "@/shared/types";
+import { Card, EDealingSpeed } from "@/shared/types";
 import { useSimpleJackGame } from "@/hooks/use-simple-jack";
 import { getCardParts } from "@/lib/utils";
 
@@ -31,15 +31,17 @@ function getSuitColor(card: Card): string {
 
 export default function Home() {
   const [numPlayers, setNumPlayers] = useState<number | undefined>();
-  const [dealingSpeed, setDealingSpeed] = useState<number>(2000);
+  const [dealingSpeed, setDealingSpeed] = useState<EDealingSpeed>(
+    EDealingSpeed.normal
+  );
 
   const { gameState, resetGame, setGameState } = useSimpleJackGame();
 
   const startGame = (): void =>
     setGameState({
       ...gameState,
+      dealingSpeed,
       players: numPlayers,
-      dealingSpeed: dealingSpeed,
     });
 
   // Auto-deal cards when in dealing phase
@@ -95,9 +97,15 @@ export default function Home() {
               onChange={(e) => setDealingSpeed(parseInt(e.target.value))}
               className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
             >
-              <option value={1000}>Fast (1s)</option>
-              <option value={2000}>Normal (2s)</option>
-              <option value={3000}>Slow (3s)</option>
+              <option value={EDealingSpeed.fast}>
+                Fast ({`${EDealingSpeed.fast / 1000}s`})
+              </option>
+              <option value={EDealingSpeed.normal}>
+                Normal ({`${EDealingSpeed.normal / 1000}s`})
+              </option>
+              <option value={EDealingSpeed.slow}>
+                Slow ({`${EDealingSpeed.slow / 1000}s`})
+              </option>
             </select>
           </div>
 

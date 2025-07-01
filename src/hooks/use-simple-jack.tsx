@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
 
-import { Card, IGameProps, IGameState, PlayerHand } from "@/shared/types";
+import {
+  Card,
+  EDealingSpeed,
+  IGameProps,
+  IGameState,
+  PlayerHand,
+} from "@/shared/types";
 import { MUST_STAND_SCORE, SIMPLE_JACK_SCORE } from "@/shared/constants";
 import {
   calculateHandValue,
@@ -144,7 +150,7 @@ export function useSimpleJackGame(props?: IGameProps) {
                     winner: playerHands[i].playerId,
                   })
                 ),
-              gameState.dealingSpeed || 2000
+              gameState.dealingSpeed || EDealingSpeed.normal
             );
           } else if (playerHands[i].score < SIMPLE_JACK_SCORE) {
             // commentary.unshift(
@@ -170,7 +176,7 @@ export function useSimpleJackGame(props?: IGameProps) {
                   playerHands,
                   gameDeck,
                 }),
-              gameState.dealingSpeed || 2000
+              gameState.dealingSpeed || EDealingSpeed.normal
             );
           } else {
             // Player busts.
@@ -196,7 +202,7 @@ export function useSimpleJackGame(props?: IGameProps) {
                   playerHands,
                   gameDeck,
                 }),
-              gameState.dealingSpeed || 2000
+              gameState.dealingSpeed || EDealingSpeed.normal
             );
           }
         }
