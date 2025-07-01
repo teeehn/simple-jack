@@ -24,10 +24,18 @@ export function getHandScore(
   hand: Pick<PlayerHand, "cards">,
   card: Card
 ): number {
-  const cardValues: CardValue[] = hand.cards
+  if (!hand || !Array.isArray(hand)) {
+    throw new TypeError(
+      "Value of argument hand in getHandScore is not the correct type."
+    );
+  }
+  if (!card) {
+    throw new TypeError("An argument value for card must be passed.");
+  }
+  const cardValues: CardValue[] = hand
     .slice()
     .concat([card])
-    .map((c) => getCardParts(c).value);
+    .map((c: Card) => getCardParts(c).value);
 
   // Are there any Aces?
 
