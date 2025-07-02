@@ -11,6 +11,10 @@ import Home from "../page";
 
 describe("Simple Jack Game UI", () => {
   beforeEach(() => {
+    jest.useFakeTimers();
+  });
+  afterEach(() => {
+    jest.useRealTimers();
     jest.clearAllMocks();
   });
 
@@ -71,13 +75,16 @@ describe("Simple Jack Game UI", () => {
         ).toBeInTheDocument()
       );
 
-      await waitFor(
-        () => expect(screen.getByText("Player 1")).toBeInTheDocument(),
-        { timeout: 2000 }
+      act(() => jest.runAllTimers());
+
+      await waitFor(() =>
+        expect(screen.getByText("Player 1")).toBeInTheDocument()
       );
-      await waitFor(
-        () => expect(screen.getByText("Player 2")).toBeInTheDocument(),
-        { timeout: 2000 }
+
+      act(() => jest.runAllTimers());
+
+      await waitFor(() =>
+        expect(screen.getByText("Player 2")).toBeInTheDocument()
       );
     });
   });
@@ -118,7 +125,7 @@ describe("Simple Jack Game UI", () => {
       const startButton = screen.getByRole("button", { name: "Start Game" });
       waitFor(() => fireEvent.click(startButton));
       for (let timers = 0; timers < 2; timers += 1) {
-        act(() => jest.advanceTimersToNextTimer());
+        act(() => jest.runAllTimers());
       }
 
       await waitFor(() =>
@@ -151,7 +158,7 @@ describe("Simple Jack Game UI", () => {
 
     test("displays 4 players when selected", async () => {
       for (let timers = 0; timers < 4; timers += 1) {
-        act(() => jest.advanceTimersToNextTimer());
+        act(() => jest.runAllTimers());
       }
 
       await waitFor(() =>
@@ -240,7 +247,7 @@ describe("Simple Jack Game UI", () => {
       fireEvent.click(startButton);
 
       for (let timers = 0; timers < 10; timers += 1) {
-        act(() => jest.advanceTimersToNextTimer());
+        act(() => jest.runAllTimers());
       }
 
       // Wait for game to potentially finish

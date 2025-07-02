@@ -85,9 +85,8 @@ export function getCardValue(card: Card, currentScore?: number): number {
   } else if (rawValue === "Ace") {
     // Ace can be 11 or 1.
     // Calculates the correct value based on current score.
-    if (!currentScore) {
-      return 1;
-    } else if (currentScore + 11 <= SIMPLE_JACK_SCORE) {
+    const currentScoreValue = currentScore || 0;
+    if (currentScoreValue + 11 <= SIMPLE_JACK_SCORE) {
       return 11;
     } else {
       return 1;

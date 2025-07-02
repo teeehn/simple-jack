@@ -1,9 +1,14 @@
 import { useEffect, useState } from "react";
 
-import { Card, IGameProps, IGameState, PlayerHand } from "@/shared/types";
+import {
+  Card,
+  EDealingSpeed,
+  IGameProps,
+  IGameState,
+  PlayerHand,
+} from "@/shared/types";
 import { MUST_STAND_SCORE, SIMPLE_JACK_SCORE } from "@/shared/constants";
 import {
-  getCardValue,
   playerCardHand,
   validateCard,
   validateDeck,
@@ -13,6 +18,7 @@ import {
   createGameSummary,
   gameCommentary,
   generateMockDeck as generateDeck,
+  getHandScore,
 } from "@/lib/utils";
 
 export function useSimpleJackGame(props?: IGameProps) {
@@ -110,13 +116,11 @@ export function useSimpleJackGame(props?: IGameProps) {
           // Deal a card.
 
           const playerCard: Card = validator(gameDeck!.shift()!);
-
-          playerHands[i].score += getCardValue(
-            playerCard,
-            playerHands[i].score
-          );
-
           playerHands[i].cards.push(playerCard);
+
+          // Calculate the score.
+
+          playerHands[i].score = getHandScore(playerHands[i].cards);
 
           commentary.unshift(
             gameCommentary.playerDraws(
@@ -148,7 +152,7 @@ export function useSimpleJackGame(props?: IGameProps) {
                     winner: playerHands[i].playerId,
                   })
                 ),
-              1000
+              gameState.dealingSpeed || EDealingSpeed.normal
             );
           } else if (playerHands[i].score < SIMPLE_JACK_SCORE) {
             // commentary.unshift(
@@ -174,7 +178,7 @@ export function useSimpleJackGame(props?: IGameProps) {
                   playerHands,
                   gameDeck,
                 }),
-              1000
+              gameState.dealingSpeed || EDealingSpeed.normal
             );
           } else {
             // Player busts.
@@ -200,7 +204,7 @@ export function useSimpleJackGame(props?: IGameProps) {
                   playerHands,
                   gameDeck,
                 }),
-              1000
+              gameState.dealingSpeed || EDealingSpeed.normal
             );
           }
         }
