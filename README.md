@@ -51,19 +51,38 @@ If there is a tie in the value of the hands there is no winner.
 
 ## Getting Started
 
-First, run the development server:
+Install the dependencies:
+
+```
+npm install
+```
+
+Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```
+
+Then navigate to http://localhost:3000/ to use the application.
+
+## Testing
+
+To run tests:
+
+```
+npm run test
+```
+
+To run tests with watcher:
+
+```
+npm run test:watch
 ```
 
 ## Docker
+
+The application has been dockerized. It may optionally be built and tested
+in a docker container as follows:
 
 ### Build the image
 
@@ -77,7 +96,7 @@ bun dev
 docker run -t simple_jack ./run_tests.sh
 ```
 
-## Info
+## Info About Next.js
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
