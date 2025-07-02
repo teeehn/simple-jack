@@ -1,4 +1,4 @@
-import { Card, CardValue, CardValueNotAce, PlayerHand } from "@/shared/types";
+import { Card, CardValue, CardValueNotAce } from "@/shared/types";
 import { SIMPLE_JACK_SCORE } from "@/shared/constants";
 import { getCardParts } from "./get-card-parts";
 
@@ -20,21 +20,15 @@ export function getStaticCardValue(rawValue: CardValueNotAce): number {
   return parsedValue;
 }
 
-export function getHandScore(
-  hand: Pick<PlayerHand, "cards">,
-  card: Card
-): number {
+export function getHandScore(hand: Card[]): number {
   if (!hand || !Array.isArray(hand)) {
     throw new TypeError(
       "Value of argument hand in getHandScore is not the correct type."
     );
   }
-  if (!card) {
-    throw new TypeError("An argument value for card must be passed.");
-  }
+
   const cardValues: CardValue[] = hand
     .slice()
-    .concat([card])
     .map((c: Card) => getCardParts(c).value);
 
   // Are there any Aces?

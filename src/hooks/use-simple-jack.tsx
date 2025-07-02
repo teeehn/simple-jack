@@ -9,7 +9,6 @@ import {
 } from "@/shared/types";
 import { MUST_STAND_SCORE, SIMPLE_JACK_SCORE } from "@/shared/constants";
 import {
-  calculateHandValue,
   playerCardHand,
   validateCard,
   validateDeck,
@@ -19,6 +18,7 @@ import {
   createGameSummary,
   gameCommentary,
   generateMockDeck as generateDeck,
+  getHandScore,
 } from "@/lib/utils";
 
 export function useSimpleJackGame(props?: IGameProps) {
@@ -116,9 +116,11 @@ export function useSimpleJackGame(props?: IGameProps) {
           // Deal a card.
 
           const playerCard: Card = validator(gameDeck!.shift()!);
-
           playerHands[i].cards.push(playerCard);
-          playerHands[i].score = calculateHandValue(playerHands[i].cards);
+
+          // Calculate the score.
+
+          playerHands[i].score = getHandScore(playerHands[i].cards);
 
           commentary.unshift(
             gameCommentary.playerDraws(

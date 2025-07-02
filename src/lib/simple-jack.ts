@@ -101,42 +101,6 @@ export function getCardValue(card: Card, currentScore?: number): number {
 }
 
 /**
- * calculateHandValue - Calculates the optimal value for a hand containing Aces
- *
- * @param cards {Card[]}
- * @returns {number}
- */
-export function calculateHandValue(cards: Card[]): number {
-  let total = 0;
-  let aces = 0;
-
-  // First pass: count aces and add non-ace values
-  for (const card of cards) {
-    const rawValue = getCardParts(card).value;
-    if (rawValue === "Ace") {
-      aces++;
-      total += 11; // Start with 11 for each ace
-    } else if (
-      rawValue === "King" ||
-      rawValue === "Queen" ||
-      rawValue === "Jack"
-    ) {
-      total += 10;
-    } else {
-      total += Number(rawValue);
-    }
-  }
-
-  // Adjust aces from 11 to 1 if total exceeds 21
-  while (total > SIMPLE_JACK_SCORE && aces > 0) {
-    total -= 10; // Convert an ace from 11 to 1
-    aces--;
-  }
-
-  return total;
-}
-
-/**
  * validateCard
  *
  * Returns a function which validates a card and saves
