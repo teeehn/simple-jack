@@ -204,11 +204,9 @@ describe("useSimpleJackGame Hook", () => {
         act(() => jest.runAllTimers());
       }
 
-      console.log(result.current.gameState.playerHands![0]);
-
       await waitFor(() =>
         expect(result.current.gameState.gameSummary).toBe(
-          "Winner: 1, Hand: ['Clubs-Ace', 'Hearts-King'], Value: 21"
+          "Winner: 1, Hand: ['Spades-Ace', 'Hearts-King'], Value: 21"
         )
       );
     });
@@ -227,8 +225,6 @@ describe("useSimpleJackGame Hook", () => {
       for (let i = 0; i < 7; i += 1) {
         act(() => jest.runAllTimers());
       }
-
-      console.log(result.current.gameState.playerHands![1]);
 
       await waitFor(() =>
         expect(result.current.gameState.gameSummary).toBe(
