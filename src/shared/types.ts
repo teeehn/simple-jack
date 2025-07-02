@@ -35,6 +35,7 @@ export interface IGameState {
   cardsDealtOnTurn: number;
   commentary: string[];
   currentPlayerIdx: number;
+  dealingSpeed?: number;
   gameDeck?: Card[];
   gameSummary?: string | null;
   gameOver: boolean;

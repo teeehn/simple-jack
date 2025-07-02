@@ -39,6 +39,7 @@ export default function Home() {
     setGameState({
       ...gameState,
       players: numPlayers,
+      dealingSpeed: dealingSpeed,
     });
 
   // Auto-deal cards when in dealing phase
