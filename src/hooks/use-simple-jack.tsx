@@ -4,7 +4,6 @@ import { Card, IGameProps, IGameState, PlayerHand } from "@/shared/types";
 import { MUST_STAND_SCORE, SIMPLE_JACK_SCORE } from "@/shared/constants";
 import {
   calculateHandValue,
-  getCardValue,
   playerCardHand,
   validateCard,
   validateDeck,

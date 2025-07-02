@@ -69,7 +69,7 @@ export default function Home() {
                   setNumPlayers(undefined);
                 }
               }}
-              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
             >
               <option key={`select`} value={``}>
                 - select -
@@ -93,7 +93,7 @@ export default function Home() {
               id="dealingSpeed"
               value={dealingSpeed}
               onChange={(e) => setDealingSpeed(parseInt(e.target.value))}
-              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
             >
               <option value={1000}>Fast (1s)</option>
               <option value={2000}>Normal (2s)</option>
