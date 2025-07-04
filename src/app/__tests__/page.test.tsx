@@ -124,9 +124,6 @@ describe("Simple Jack Game UI", () => {
     test("displays correct number of players", async () => {
       const startButton = screen.getByRole("button", { name: "Start Game" });
       waitFor(() => fireEvent.click(startButton));
-      for (let timers = 0; timers < 2; timers += 1) {
-        act(() => jest.runAllTimers());
-      }
 
       await waitFor(() =>
         expect(screen.getByText("Player 1")).toBeInTheDocument()
@@ -157,10 +154,6 @@ describe("Simple Jack Game UI", () => {
     });
 
     test("displays 4 players when selected", async () => {
-      for (let timers = 0; timers < 4; timers += 1) {
-        act(() => jest.runAllTimers());
-      }
-
       await waitFor(() =>
         expect(screen.getByText("Player 1")).toBeInTheDocument()
       );

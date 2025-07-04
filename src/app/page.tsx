@@ -141,6 +141,7 @@ export default function Home() {
           {gameState.playerHands &&
             gameState.playerHands!.map((player) => (
               <div
+                data-testid={`player-${player.playerId}`}
                 key={player.playerId}
                 className={`bg-white rounded-lg p-6 shadow-lg
                  ${

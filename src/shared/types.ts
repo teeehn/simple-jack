@@ -58,3 +58,8 @@ export interface IGameProps {
 }
 
 export type CardValueNotAce = Exclude<CardValue, "Ace">;
+
+export interface IPlayerProps {
+  hand: PlayerHand;
+  winner?: number;
+}
