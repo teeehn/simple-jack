@@ -69,9 +69,12 @@ export function useSimpleJackGame(props?: IGameProps) {
 
       validatePlayers(gameState.players);
 
-      // Store the players' hands.
+      // Store the players' hands - initialize all players immediately.
 
-      const playerHands: PlayerHand[] = new Array(gameState.players);
+      const playerHands: PlayerHand[] = Array.from(
+        { length: gameState.players },
+        (_, i) => playerCardHand(i + 1)
+      );
 
       setGameState({
         ...gameState,
@@ -95,11 +98,7 @@ export function useSimpleJackGame(props?: IGameProps) {
     } = gameState;
 
     if (!gameOver && playerHands) {
-      // Initialize player hand object on first turn.
-
-      if (!playerHands[i]) {
-        playerHands[i] = playerCardHand(i + 1);
-      }
+      // Player hands are now initialized immediately, so we can skip the initialization check
 
       if (playerHands[i]?.score < MUST_STAND_SCORE) {
         // First check for an exhausted deck.
