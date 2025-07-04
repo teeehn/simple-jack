@@ -14,10 +14,9 @@ describe("Player", () => {
     expect(container).toBeInTheDocument();
     expect(screen.getByTestId("player-1")).toBeInTheDocument();
     expect(screen.getByText(/Player 1/)).toBeInTheDocument();
-    screen.debug();
   });
 
-  test.only("Renders a player with a card and a score.", () => {
+  test("Renders a player with a card and a score.", () => {
     const mockHand: PlayerHand = playerCardHand(2);
     mockHand.cards = ["Spades-Ace"];
     mockHand.score = 11;

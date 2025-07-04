@@ -2,32 +2,9 @@
 
 import { useState } from "react";
 
-import { Card, EDealingSpeed } from "@/shared/types";
+import { EDealingSpeed } from "@/shared/types";
 import { useSimpleJackGame } from "@/hooks/use-simple-jack";
-import { getCardParts } from "@/lib/utils";
-
-function getSuitSymbol(card: Card): string {
-  const suit = getCardParts(card).suit;
-  switch (suit) {
-    case "Hearts":
-      return "♥";
-    case "Diamonds":
-      return "♦";
-    case "Clubs":
-      return "♣";
-    case "Spades":
-      return "♠";
-    default:
-      return "";
-  }
-}
-
-function getSuitColor(card: Card): string {
-  const suit = getCardParts(card).suit;
-  return suit === "Hearts" || suit === "Diamonds"
-    ? "text-red-600"
-    : "text-black";
-}
+import { Player } from "@/components/player";
 
 export default function Home() {
   const [numPlayers, setNumPlayers] = useState<number | undefined>();
@@ -43,8 +20,6 @@ export default function Home() {
       dealingSpeed,
       players: numPlayers,
     });
-
-  // Auto-deal cards when in dealing phase
 
   if (!gameState.players) {
     return (
@@ -139,66 +114,16 @@ export default function Home() {
         {/* Players Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {gameState.playerHands &&
-            gameState.playerHands!.map((player) => (
-              <div
-                data-testid={`player-${player.playerId}`}
+            gameState.playerHands.map((player) => (
+              <Player
                 key={player.playerId}
-                className={`bg-white rounded-lg p-6 shadow-lg
-                 ${
-                   gameState.currentPlayerIdx === player.playerId! - 1 &&
-                   !gameState.gameOver
-                     ? "ring-4 ring-yellow-400"
-                     : ""
-                 } ${player.isEliminated ? "opacity-50" : ""} ${
-                  gameState.winner === player.playerId
-                    ? "ring-4 ring-green-500"
-                    : ""
-                }`}
-              >
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-xl font-bold text-gray-800">
-                    Player {player.playerId}
-                  </h3>
-                  <div className="text-right">
-                    <div className="text-2xl font-bold text-gray-800">
-                      {player.score}
-                    </div>
-                    {player.isEliminated && (
-                      <div className="text-red-600 font-semibold">BUST</div>
-                    )}
-                    {gameState.winner === player.playerId && (
-                      <div className="text-green-600 font-semibold">
-                        WINNER!
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-4 gap-2">
-                  {player.cards.map((card, index) => (
-                    <div
-                      key={index}
-                      className={`bg-white border-2 border-gray-300 rounded-lg p-2 text-center shadow-sm ${getSuitColor(
-                        card
-                      )}`}
-                    >
-                      <div className="text-lg font-bold">
-                        {getCardParts(card).value}
-                      </div>
-                      <div className="text-xl">{getSuitSymbol(card)}</div>
-                    </div>
-                  ))}
-                  {/* Empty card slots */}
-                  {Array.from({
-                    length: Math.max(0, 6 - player.cards.length),
-                  }).map((_, index) => (
-                    <div
-                      key={`empty-${index}`}
-                      className="bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg p-2 h-16"
-                    />
-                  ))}
-                </div>
-              </div>
+                hand={player}
+                winner={gameState.winner}
+                isCurrentPlayer={
+                  gameState.currentPlayerIdx === player.playerId! - 1
+                }
+                isGameOver={gameState.gameOver}
+              />
             ))}
         </div>
 
