@@ -1,28 +1,5 @@
-import { Card, IPlayerProps } from "@/shared/types";
-import { getCardParts } from "@/lib/utils";
-
-function getSuitSymbol(card: Card): string {
-  const suit = getCardParts(card).suit;
-  switch (suit) {
-    case "Hearts":
-      return "♥";
-    case "Diamonds":
-      return "♦";
-    case "Clubs":
-      return "♣";
-    case "Spades":
-      return "♠";
-    default:
-      return "";
-  }
-}
-
-function getSuitColor(card: Card): string {
-  const suit = getCardParts(card).suit;
-  return suit === "Hearts" || suit === "Diamonds"
-    ? "text-red-600"
-    : "text-black";
-}
+import { IPlayerProps } from "@/shared/types";
+import { getCardParts, getSuitColor, getSuitSymbol } from "@/lib/utils";
 
 export function Player({
   hand,
