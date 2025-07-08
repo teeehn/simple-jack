@@ -6,6 +6,7 @@ import {
   waitFor,
   act,
 } from "@testing-library/react";
+import { userEvent } from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import Home from "../page";
 
@@ -23,6 +24,7 @@ describe("Simple Jack Game UI", () => {
       render(<Home />);
 
       expect(screen.getByText("Simple Jack")).toBeInTheDocument();
+      expect(screen.getByText(/your name/i)).toBeInTheDocument();
       expect(screen.getByText("Number of Players (2-6):")).toBeInTheDocument();
       expect(screen.getByText("Dealing Speed:")).toBeInTheDocument();
       expect(
@@ -56,8 +58,23 @@ describe("Simple Jack Game UI", () => {
       fireEvent.change(speedSelect, { target: { value: "3000" } });
     });
 
+    test("allows entering the user's name", async () => {
+      render(<Home />);
+
+      const nameInput = screen.getByLabelText(/your name/i);
+      expect(nameInput).toBeInTheDocument();
+
+      await waitFor(() => userEvent.type(nameInput, "TestUser"));
+
+      expect(nameInput).toHaveValue("TestUser");
+    });
+
     test("starts game when Start Game button is clicked", async () => {
       render(<Home />);
+
+      const nameInput = screen.getByLabelText(/your name/i);
+      expect(nameInput).toBeInTheDocument();
+      await waitFor(() => userEvent.type(nameInput, "TestUser"));
 
       const playerSelect = screen.getByLabelText("Number of Players (2-6):");
       expect(playerSelect).toBeInTheDocument();
@@ -71,20 +88,20 @@ describe("Simple Jack Game UI", () => {
       // Should transition to game screen
       await waitFor(() =>
         expect(
-          screen.getByText("Dealing cards... Current player: 1")
+          screen.getByText("Dealing cards... Current player: TestUser")
         ).toBeInTheDocument()
       );
 
       act(() => jest.runAllTimers());
 
       await waitFor(() =>
-        expect(screen.getByText("Player 1")).toBeInTheDocument()
+        expect(screen.getByText("TestUser")).toBeInTheDocument()
       );
 
       act(() => jest.runAllTimers());
 
       await waitFor(() =>
-        expect(screen.getByText("Player 2")).toBeInTheDocument()
+        expect(screen.getByText("Dealer")).toBeInTheDocument()
       );
     });
   });
@@ -93,6 +110,14 @@ describe("Simple Jack Game UI", () => {
     beforeEach(async () => {
       jest.useFakeTimers();
       render(<Home />);
+
+      // Enter name
+
+      const nameInput = screen.getByLabelText(/your name/i);
+      await waitFor(() => userEvent.type(nameInput, "TestUser"));
+
+      // Enter number of players.
+
       const playerSelect = screen.getByLabelText("Number of Players (2-6):");
       await waitFor(() =>
         fireEvent.change(playerSelect, { target: { value: "2" } })
@@ -113,7 +138,7 @@ describe("Simple Jack Game UI", () => {
       );
       await waitFor(() =>
         expect(
-          screen.getByText("Dealing cards... Current player: 1")
+          screen.getByText("Dealing cards... Current player: TestUser")
         ).toBeInTheDocument()
       );
       await waitFor(() =>
@@ -126,11 +151,11 @@ describe("Simple Jack Game UI", () => {
       waitFor(() => fireEvent.click(startButton));
 
       await waitFor(() =>
-        expect(screen.getByText("Player 1")).toBeInTheDocument()
+        expect(screen.getByText("TestUser")).toBeInTheDocument()
       );
 
       await waitFor(() =>
-        expect(screen.getByText("Player 2")).toBeInTheDocument()
+        expect(screen.getByText("Dealer")).toBeInTheDocument()
       );
     });
   });
@@ -139,13 +164,18 @@ describe("Simple Jack Game UI", () => {
     beforeEach(async () => {
       jest.useFakeTimers();
       render(<Home />);
+
+      // Enter name
+
+      const nameInput = screen.getByLabelText(/your name/i);
+      await waitFor(() => userEvent.type(nameInput, "TestUser"));
+
+      // Enter number of players.
+
       const playerSelect = screen.getByLabelText("Number of Players (2-6):");
       await waitFor(() =>
         fireEvent.change(playerSelect, { target: { value: "4" } })
       );
-
-      const startButton = screen.getByRole("button", { name: "Start Game" });
-      fireEvent.click(startButton);
     });
 
     afterEach(() => {
@@ -154,8 +184,11 @@ describe("Simple Jack Game UI", () => {
     });
 
     test("displays 4 players when selected", async () => {
+      const startButton = screen.getByRole("button", { name: "Start Game" });
+      userEvent.click(startButton);
+
       await waitFor(() =>
-        expect(screen.getByText("Player 1")).toBeInTheDocument()
+        expect(screen.getByText("TestUser")).toBeInTheDocument()
       );
       await waitFor(() =>
         expect(screen.getByText("Player 2")).toBeInTheDocument()
@@ -164,7 +197,7 @@ describe("Simple Jack Game UI", () => {
         expect(screen.getByText("Player 3")).toBeInTheDocument()
       );
       await waitFor(() =>
-        expect(screen.getByText("Player 4")).toBeInTheDocument()
+        expect(screen.getByText("Dealer")).toBeInTheDocument()
       );
     });
   });
@@ -173,11 +206,18 @@ describe("Simple Jack Game UI", () => {
     beforeEach(async () => {
       jest.useFakeTimers();
       render(<Home />);
-      const playerSelect = screen.getByLabelText("Number of Players (2-6):");
-      fireEvent.change(playerSelect, { target: { value: "2" } });
 
-      const startButton = screen.getByRole("button", { name: "Start Game" });
-      fireEvent.click(startButton);
+      // Enter name
+
+      const nameInput = screen.getByLabelText(/your name/i);
+      await waitFor(() => userEvent.type(nameInput, "TestUser"));
+
+      // Enter number of players.
+
+      const playerSelect = screen.getByLabelText("Number of Players (2-6):");
+      await waitFor(() =>
+        fireEvent.change(playerSelect, { target: { value: "2" } })
+      );
     });
 
     afterEach(() => {
@@ -185,8 +225,13 @@ describe("Simple Jack Game UI", () => {
       jest.useRealTimers();
     });
 
-    test("displays game commentary section", () => {
-      expect(screen.getByText("Game Commentary")).toBeInTheDocument();
+    test("displays game commentary section", async () => {
+      const startButton = screen.getByRole("button", { name: "Start Game" });
+      userEvent.click(startButton);
+
+      await waitFor(() =>
+        expect(screen.getByText("Game Commentary")).toBeInTheDocument()
+      );
     });
   });
 
@@ -194,8 +239,18 @@ describe("Simple Jack Game UI", () => {
     beforeEach(async () => {
       jest.useFakeTimers();
       render(<Home />);
+
+      // Enter name
+
+      const nameInput = screen.getByLabelText(/your name/i);
+      await waitFor(() => userEvent.type(nameInput, "TestUser"));
+
+      // Enter number of players.
+
       const playerSelect = screen.getByLabelText("Number of Players (2-6):");
-      fireEvent.change(playerSelect, { target: { value: "2" } });
+      await waitFor(() =>
+        fireEvent.change(playerSelect, { target: { value: "2" } })
+      );
     });
 
     afterEach(() => {
@@ -211,18 +266,31 @@ describe("Simple Jack Game UI", () => {
 
       // Move to dealing phase
       const startButton = screen.getByRole("button", { name: "Start Game" });
-      fireEvent.click(startButton);
+      userEvent.click(startButton);
 
-      expect(
-        screen.getByText("Dealing cards... Current player: 1")
-      ).toBeInTheDocument();
+      await waitFor(() =>
+        expect(
+          screen.getByText("Dealing cards... Current player: TestUser")
+        ).toBeInTheDocument()
+      );
     });
   });
 
-  describe("Play New Game Button", () => {
+  // TODO: Add a mock for useSimpleJack hook to insure the tests
+  //  behave as expected with known conditions.
+
+  describe("Waits for user to choose hit or stand", () => {
     beforeEach(async () => {
       jest.useFakeTimers();
       render(<Home />);
+
+      // Enter name
+
+      const nameInput = screen.getByLabelText(/your name/i);
+      await waitFor(() => userEvent.type(nameInput, "TestUser"));
+
+      // Enter number of players.
+
       const playerSelect = screen.getByLabelText("Number of Players (2-6):");
       await waitFor(() =>
         fireEvent.change(playerSelect, { target: { value: "2" } })
@@ -234,19 +302,77 @@ describe("Simple Jack Game UI", () => {
       jest.useRealTimers();
     });
 
-    test("Play New Game Button is visible at the end of the game.", async () => {
+    test("Waits for user to hit or stand.", async () => {
       // Start a game
       const startButton = screen.getByRole("button", { name: "Start Game" });
-      fireEvent.click(startButton);
+      userEvent.click(startButton);
 
       for (let timers = 0; timers < 10; timers += 1) {
-        act(() => jest.runAllTimers());
+        await act(() => jest.runAllTimers());
       }
 
-      // Wait for game to potentially finish
+      // Wait for game to pause for the user to decide to hit or stand.
+
       await waitFor(() =>
-        expect(screen.getByText(/Game Complete/)).toBeInTheDocument()
+        expect(
+          screen.getByText(
+            /TestUser, it\'s your turn! What would you like to do\?/i
+          )
+        ).toBeInTheDocument()
       );
+
+      await waitFor(() =>
+        expect(
+          screen.getByRole("button", { name: "Hit me" })
+        ).toBeInTheDocument()
+      );
+
+      await waitFor(() =>
+        expect(
+          screen.getByRole("button", { name: "Stand" })
+        ).toBeInTheDocument()
+      );
+    });
+  });
+
+  describe("Play New Game", () => {
+    beforeEach(async () => {
+      jest.useFakeTimers();
+      render(<Home />);
+
+      // Enter name
+
+      const nameInput = screen.getByLabelText(/your name/i);
+      await waitFor(() => userEvent.type(nameInput, "TestUser"));
+
+      // Enter number of players.
+
+      const playerSelect = screen.getByLabelText("Number of Players (2-6):");
+      await waitFor(() =>
+        fireEvent.change(playerSelect, { target: { value: "2" } })
+      );
+    });
+
+    afterEach(() => {
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+    });
+
+    test("Play New Game button appears after game has finished.", async () => {
+      // Start a game
+      const startButton = screen.getByRole("button", { name: "Start Game" });
+      userEvent.click(startButton);
+
+      for (let timers = 0; timers < 6; timers += 1) {
+        await act(() => jest.runAllTimers());
+      }
+
+      // Wait for game to pause for the user to decide to hit or stand.
+
+      await waitFor(() =>
+        expect(screen.getByText(/game complete/i)).toBeInTheDocument()
+      );
+
       await waitFor(() =>
         expect(
           screen.getByRole("button", { name: "Play New Game" })
