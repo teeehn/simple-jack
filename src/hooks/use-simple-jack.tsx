@@ -40,8 +40,12 @@ export function useSimpleJackGame(props?: IGameProps) {
   });
 
   const resetGame = () => {
+    // Generate and validate a new deck.
+
     const gameDeck = generateDeck();
     validateDeck(gameDeck);
+
+    // Reset the game state.
 
     setGameState({
       cardsDealtOnTurn: 0,
@@ -96,6 +100,8 @@ export function useSimpleJackGame(props?: IGameProps) {
     } = gameState;
 
     if (!playerHands || !gameDeck || gameDeck.length <= 0) return;
+
+    // Initialize the card deal validator.
 
     const validator = validateCard();
     const playerCard: Card = validator(gameDeck.shift()!);
@@ -184,6 +190,7 @@ export function useSimpleJackGame(props?: IGameProps) {
 
   useEffect(() => {
     // This will initialize the game when the number of players is passed.
+
     if (gameState.players) {
       // Validate number of players
 
@@ -218,7 +225,8 @@ export function useSimpleJackGame(props?: IGameProps) {
     } = gameState;
 
     if (!gameOver && playerHands) {
-      // Check if it's the user's turn and they have 2+ cards
+      // Check if it's the user's turn and they have 2+ cards.
+
       const isUserTurn = i === 0;
       const userHand = playerHands[0];
       const userCanChoose =
@@ -228,7 +236,8 @@ export function useSimpleJackGame(props?: IGameProps) {
         !userHand.hasStood &&
         !userHand.isEliminated;
 
-      // If it's the user's turn and they can choose, wait for their decision
+      // If it's the user's turn and they can choose, wait for their decision.
+
       if (userCanChoose) {
         return;
       }
@@ -252,13 +261,19 @@ export function useSimpleJackGame(props?: IGameProps) {
         const nextPlayerIdx = i + 1 < players! ? i + 1 : 0;
 
         if (nextPlayerIdx === 0) {
+          // Back to the first player.
+
           if (cardsDealtOnTurn === 0) {
+            // If no cards have been dealt in the round, end the game.
+
             setGameState({
               ...gameState,
               commentary,
               gameOver: true,
             });
           } else {
+            // Deal to the first player.
+
             setGameState({
               ...gameState,
               cardsDealtOnTurn: 0,
@@ -267,6 +282,8 @@ export function useSimpleJackGame(props?: IGameProps) {
             });
           }
         } else {
+          // Deal to the next player.
+
           setGameState({
             ...gameState,
             commentary,
@@ -283,6 +300,8 @@ export function useSimpleJackGame(props?: IGameProps) {
       );
 
       if (highScores.length === 1) {
+        // We have a winner.
+
         const updatedCommentary = [...commentary];
         updatedCommentary.unshift(
           `${getPlayerDisplayName(
@@ -298,6 +317,10 @@ export function useSimpleJackGame(props?: IGameProps) {
           })
         );
       } else {
+        // Push
+
+        // TODO: Add commentary here.
+
         setGameState(
           createGameSummary({
             ...gameState,
