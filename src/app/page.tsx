@@ -157,8 +157,8 @@ export default function Home() {
           <div className="text-center mb-6">
             <div className="bg-white rounded-lg p-4 shadow-lg inline-block">
               <p className="text-gray-800 mb-4 font-semibold">
-                {gameState.playerName}, it's your turn! What would you like to
-                do?
+                {gameState.playerName}, it&apos;s your turn! What would you like
+                to do?
               </p>
               <div className="space-x-4">
                 <button
