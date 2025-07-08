@@ -16,7 +16,6 @@ import {
 } from "@/lib/simple-jack";
 import {
   createGameSummary,
-  gameCommentary,
   generateMockDeck as generateDeck,
   getHandScore,
 } from "@/lib/utils";
@@ -53,6 +52,7 @@ export function useSimpleJackGame(props?: IGameProps) {
       gameDeck,
     });
   };
+
   const getPlayerDisplayName = (playerId: number) => {
     if (playerId === 1) {
       return gameState.playerName || "Player";
@@ -61,12 +61,6 @@ export function useSimpleJackGame(props?: IGameProps) {
       return "Dealer";
     }
     return `Player ${playerId}`;
-  };
-
-  const hitMe = () => {
-    if (gameState.currentPlayerIdx === 0 && gameState.playerHands?.[0]) {
-      dealCardToCurrentPlayer();
-    }
   };
 
   const stand = () => {
@@ -179,6 +173,12 @@ export function useSimpleJackGame(props?: IGameProps) {
           }),
         gameState.dealingSpeed || EDealingSpeed.normal
       );
+    }
+  };
+
+  const hitMe = () => {
+    if (gameState.currentPlayerIdx === 0 && gameState.playerHands?.[0]) {
+      dealCardToCurrentPlayer();
     }
   };
 

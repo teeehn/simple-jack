@@ -1,5 +1,7 @@
 import { Card } from "@/shared/types";
 
+// TODO: Refactor and use this or eliminate.
+
 export const gameCommentary = {
   playerDraws: (playerId: number, card: Card) =>
     `Player ${playerId} draws ${card}`,
