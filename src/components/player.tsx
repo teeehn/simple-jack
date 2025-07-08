@@ -6,9 +6,11 @@ export function Player({
   winner,
   isCurrentPlayer,
   isGameOver,
+  displayName,
 }: IPlayerProps & {
   isCurrentPlayer?: boolean;
   isGameOver?: boolean;
+  displayName?: string;
 }) {
   return (
     <div
@@ -20,7 +22,7 @@ export function Player({
     >
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-xl font-bold text-gray-800">
-          Player {hand.playerId}
+          {displayName || `Player ${hand.playerId}`}
         </h3>
         <div className="text-right">
           <div className="text-2xl font-bold text-gray-800">{hand.score}</div>
@@ -29,6 +31,9 @@ export function Player({
           )}
           {winner === hand.playerId && (
             <div className="text-green-600 font-semibold">WINNER!</div>
+          )}
+          {hand.hasStood && !hand.isEliminated && (
+            <div className="text-blue-600 font-semibold">STAND</div>
           )}
         </div>
       </div>
