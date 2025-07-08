@@ -8,17 +8,20 @@ import { Player } from "@/components/player";
 
 export default function Home() {
   const [numPlayers, setNumPlayers] = useState<number | undefined>();
+  const [playerName, setPlayerName] = useState<string>("");
   const [dealingSpeed, setDealingSpeed] = useState<EDealingSpeed>(
     EDealingSpeed.normal
   );
 
-  const { gameState, resetGame, setGameState } = useSimpleJackGame();
+  const { gameState, resetGame, setGameState, hitMe, stand } =
+    useSimpleJackGame();
 
   const startGame = (): void =>
     setGameState({
       ...gameState,
       dealingSpeed,
       players: numPlayers,
+      playerName: playerName.trim() || "Player",
     });
 
   if (!gameState.players) {
@@ -28,6 +31,23 @@ export default function Home() {
           <h1 className="text-4xl font-bold text-center mb-8 text-gray-800">
             Simple Jack
           </h1>
+
+          <div className="mb-6">
+            <label
+              htmlFor="playerName"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Your Name:
+            </label>
+            <input
+              id="playerName"
+              type="text"
+              value={playerName}
+              onChange={(e) => setPlayerName(e.target.value)}
+              placeholder="Enter your name"
+              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
+            />
+          </div>
 
           <div className="mb-6">
             <label
@@ -86,7 +106,8 @@ export default function Home() {
 
           <button
             onClick={startGame}
-            className="w-full bg-blue-600 text-white py-3 px-6 rounded-md hover:bg-blue-700 transition-colors font-semibold text-lg"
+            disabled={!numPlayers || !playerName.trim()}
+            className="w-full bg-blue-600 text-white py-3 px-6 rounded-md hover:bg-blue-700 transition-colors font-semibold text-lg disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
             Start Game
           </button>
@@ -94,6 +115,26 @@ export default function Home() {
       </div>
     );
   }
+
+  const getPlayerDisplayName = (playerId: number) => {
+    if (playerId === 1) {
+      return gameState.playerName || "Player";
+    }
+    if (playerId === gameState.players) {
+      return "Dealer";
+    }
+    return `Player ${playerId}`;
+  };
+
+  const isUserTurn = gameState.currentPlayerIdx === 0;
+  const userHand = gameState.playerHands?.[0];
+  const canUserChoose =
+    isUserTurn &&
+    !gameState.gameOver &&
+    userHand &&
+    userHand.cards.length >= 2 &&
+    !userHand.hasStood &&
+    !userHand.isEliminated;
 
   return (
     <div className="min-h-screen bg-green-800 p-4">
@@ -104,12 +145,38 @@ export default function Home() {
             {!gameState.gameOver && (
               <span>
                 Dealing cards... Current player:{" "}
-                {gameState.currentPlayerIdx + 1}
+                {getPlayerDisplayName(gameState.currentPlayerIdx + 1)}
               </span>
             )}
             {gameState.gameOver && <span>Game Complete!</span>}
           </div>
         </div>
+
+        {/* User Controls */}
+        {canUserChoose && (
+          <div className="text-center mb-6">
+            <div className="bg-white rounded-lg p-4 shadow-lg inline-block">
+              <p className="text-gray-800 mb-4 font-semibold">
+                {gameState.playerName}, it&apos;s your turn! What would you like
+                to do?
+              </p>
+              <div className="space-x-4">
+                <button
+                  onClick={hitMe}
+                  className="bg-red-600 text-white py-2 px-6 rounded-md hover:bg-red-700 transition-colors font-semibold"
+                >
+                  Hit me
+                </button>
+                <button
+                  onClick={stand}
+                  className="bg-blue-600 text-white py-2 px-6 rounded-md hover:bg-blue-700 transition-colors font-semibold"
+                >
+                  Stand
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Players Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
@@ -123,6 +190,7 @@ export default function Home() {
                   gameState.currentPlayerIdx === player.playerId! - 1
                 }
                 isGameOver={gameState.gameOver}
+                displayName={getPlayerDisplayName(player.playerId!)}
               />
             ))}
         </div>

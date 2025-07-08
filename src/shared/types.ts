@@ -26,6 +26,7 @@ export interface PlayerHand {
   isEliminated?: boolean;
   playerId?: number;
   score: number;
+  hasStood?: boolean; // Track if player has chosen to stand
 }
 
 export type PlayerHandsMockup = Record<string, Card[]>;
@@ -49,6 +50,8 @@ export interface IGameState {
   isEliminated?: boolean;
   players?: number;
   playerHands?: PlayerHand[];
+  playerName?: string; // Add player name
+  userHasStood?: boolean; // Track if user has chosen to stand
   winner?: number;
 }
 
