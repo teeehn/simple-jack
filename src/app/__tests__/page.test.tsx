@@ -8,12 +8,32 @@ import {
 } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import "@testing-library/jest-dom";
+
+import { useSimpleJackGame } from "@/hooks/use-simple-jack";
+
+import { generateMockDeck } from "@/lib/utils";
+
+jest.mock("@/hooks/use-simple-jack", () => ({
+  useSimpleJackGame: jest.fn(),
+}));
+
 import Home from "../page";
 
 describe("Simple Jack Game UI", () => {
   beforeEach(() => {
     jest.useFakeTimers();
+
+    (useSimpleJackGame as jest.Mock).mockImplementation(() => {
+      const { useSimpleJackGame: testHook } = jest.requireActual(
+        "@/hooks/use-simple-jack"
+      );
+
+      return {
+        ...testHook(),
+      };
+    });
   });
+
   afterEach(() => {
     jest.useRealTimers();
     jest.clearAllMocks();
@@ -276,12 +296,24 @@ describe("Simple Jack Game UI", () => {
     });
   });
 
-  // TODO: Add a mock for useSimpleJack hook to insure the tests
-  //  behave as expected with known conditions.
-
   describe("Waits for user to choose hit or stand", () => {
     beforeEach(async () => {
       jest.useFakeTimers();
+
+      (useSimpleJackGame as jest.Mock).mockImplementation(() => {
+        const { useSimpleJackGame: testHook } = jest.requireActual(
+          "@/hooks/use-simple-jack"
+        );
+
+        const deck = generateMockDeck({
+          "1": ["Spades-Ace", "Spades-7"],
+          "2": ["Clubs-10", "Hearts-7"],
+        });
+
+        return {
+          ...testHook({ deck }),
+        };
+      });
       render(<Home />);
 
       // Enter name
@@ -338,6 +370,22 @@ describe("Simple Jack Game UI", () => {
   describe("Play New Game", () => {
     beforeEach(async () => {
       jest.useFakeTimers();
+
+      (useSimpleJackGame as jest.Mock).mockImplementation(() => {
+        const { useSimpleJackGame: testHook } = jest.requireActual(
+          "@/hooks/use-simple-jack"
+        );
+
+        const deck = generateMockDeck({
+          "1": ["Spades-Ace", "Spades-King"],
+          "2": ["Clubs-10", "Hearts-7"],
+        });
+
+        return {
+          ...testHook({ deck }),
+        };
+      });
+
       render(<Home />);
 
       // Enter name
