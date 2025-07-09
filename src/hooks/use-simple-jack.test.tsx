@@ -28,7 +28,9 @@ describe("useSimpleJackGame Hook", () => {
 
     test("Rendering hook with mock deck returns initial state.", () => {
       const deck = generateMockDeck();
-      const { result } = renderHook(() => useSimpleJackGame({ deck }));
+      const { result } = renderHook(() =>
+        useSimpleJackGame({ deck, playerName: "TestUser" })
+      );
       const { gameState } = result.current;
       expect(gameState).toStrictEqual({
         cardsDealtOnTurn: 0,
@@ -38,6 +40,7 @@ describe("useSimpleJackGame Hook", () => {
         highScore: 0,
         gameDeck: deck,
         players: undefined,
+        playerName: "TestUser",
       });
     });
 
@@ -49,7 +52,7 @@ describe("useSimpleJackGame Hook", () => {
       ]);
 
       const { result } = renderHook(() =>
-        useSimpleJackGame({ deck, players: 2 })
+        useSimpleJackGame({ deck, players: 2, playerName: "TestUser" })
       );
 
       // Run all timers for each card that must be dealt.
@@ -59,33 +62,40 @@ describe("useSimpleJackGame Hook", () => {
 
       await waitFor(() =>
         expect(result.current.gameState.gameSummary).toBe(
-          "Winner: 1, Hand: ['Spades-Jack', 'Spades-Ace'], Value: 21"
+          "Winner: TestUser, Hand: ['Spades-Jack', 'Spades-Ace'], Value: 21"
         )
       );
     });
 
-    test("2 players. Player 1 busts. Player 2 wins with 17 (Can't hit).", async () => {
-      const deck: Card[] = generateMockDeck([
-        "Spades-Jack",
-        "Clubs-7",
-        "Spades-6",
-        "Diamonds-Jack",
-        "Hearts-10",
-      ]);
+    test("2 players. Player 1 busts with 25. Player 2 wins with 17 (Can't hit).", async () => {
+      const deck: Card[] = generateMockDeck({
+        "1": ["Spades-King", "Spades-5", "Hearts-10"],
+        "2": ["Clubs-7", "Diamonds-Jack"],
+      });
 
       const { result } = renderHook(() =>
         useSimpleJackGame({ deck, players: 2 })
       );
 
       // Run all timers for each card that must be dealt.
-      for (let i = 0; i < 5; i += 1) {
+      for (let i = 0; i < 4; i += 1) {
         act(() => jest.runAllTimers());
       }
 
+      const { hitMe } = result.current;
+
+      await waitFor(() => hitMe());
+
+      act(() => jest.runAllTimers());
+
       await waitFor(() =>
         expect(result.current.gameState.gameSummary).toBe(
-          "Winner: 2, Hand: ['Clubs-7', 'Diamonds-Jack'], Value: 17"
+          "Winner: Dealer, Hand: ['Clubs-7', 'Diamonds-Jack'], Value: 17"
         )
+      );
+
+      await waitFor(() =>
+        expect(result.current.gameState.playerHands![0].score).toBe(25)
       );
     });
 
@@ -117,9 +127,18 @@ describe("useSimpleJackGame Hook", () => {
         act(() => jest.runAllTimers());
       }
 
+      const { hitMe } = result.current;
+
+      await waitFor(() => hitMe());
+
+      // Run all timers for each card that must be dealt.
+      for (let i = 0; i < 15; i += 1) {
+        act(() => jest.runAllTimers());
+      }
+
       await waitFor(() =>
         expect(result.current.gameState.gameSummary).toBe(
-          "Winner: 2, Hand: ['Hearts-King', 'Spades-Jack'], Value: 20"
+          "Winner: Player 2, Hand: ['Hearts-King', 'Spades-Jack'], Value: 20"
         )
       );
     });
@@ -144,8 +163,17 @@ describe("useSimpleJackGame Hook", () => {
       ]);
 
       const { result } = renderHook(() =>
-        useSimpleJackGame({ deck, players: 6 })
+        useSimpleJackGame({ deck, players: 6, playerName: "TestUser" })
       );
+
+      // Run all timers for each card that must be dealt.
+      for (let i = 0; i < 15; i += 1) {
+        act(() => jest.runAllTimers());
+      }
+
+      const { hitMe } = result.current;
+
+      await waitFor(() => hitMe());
 
       // Run all timers for each card that must be dealt.
       for (let i = 0; i < 15; i += 1) {
@@ -155,31 +183,40 @@ describe("useSimpleJackGame Hook", () => {
       await waitFor(() =>
         expect(result.current.gameState.gameSummary).toBe(null)
       );
+
+      const playerHands = result.current.gameState.playerHands;
+
+      expect(playerHands![1].score).toBe(20);
+
+      expect(playerHands![5].score).toBe(20);
     });
 
     test("Multiple Aces in each hand to evaluate. Player 2 wins with 21.", async () => {
-      const deck: Card[] = generateMockDeck([
-        "Spades-Ace",
-        "Clubs-Ace",
-        "Hearts-Ace",
-        "Diamonds-Ace",
-        "Clubs-8",
-        "Hearts-4",
-        "Spades-5",
-      ]);
+      const deck: Card[] = generateMockDeck({
+        "1": ["Spades-Ace", "Hearts-Ace", "Clubs-8"],
+        "2": ["Clubs-Ace", "Diamonds-Ace", "Hearts-9"],
+      });
 
       const { result } = renderHook(() =>
-        useSimpleJackGame({ deck, players: 2 })
+        useSimpleJackGame({ deck, players: 2, playerName: "TestUser" })
       );
 
       // Run all timers for each card that must be dealt.
-      for (let i = 0; i < 7; i += 1) {
+      for (let i = 0; i < 4; i += 1) {
+        act(() => jest.runAllTimers());
+      }
+
+      const { hitMe } = result.current;
+
+      await waitFor(() => hitMe());
+
+      for (let i = 0; i < 4; i += 1) {
         act(() => jest.runAllTimers());
       }
 
       await waitFor(() =>
         expect(result.current.gameState.gameSummary).toBe(
-          "Winner: 2, Hand: ['Clubs-Ace', 'Diamonds-Ace', 'Hearts-4', 'Spades-5'], Value: 21"
+          "Winner: Dealer, Hand: ['Clubs-Ace', 'Diamonds-Ace', 'Hearts-9'], Value: 21"
         )
       );
     });
@@ -196,7 +233,7 @@ describe("useSimpleJackGame Hook", () => {
       ]);
 
       const { result } = renderHook(() =>
-        useSimpleJackGame({ deck, players: 2 })
+        useSimpleJackGame({ deck, players: 2, playerName: "TestUser" })
       );
 
       // Run all timers for each card that must be dealt.
@@ -206,7 +243,7 @@ describe("useSimpleJackGame Hook", () => {
 
       await waitFor(() =>
         expect(result.current.gameState.gameSummary).toBe(
-          "Winner: 1, Hand: ['Spades-Ace', 'Hearts-King'], Value: 21"
+          "Winner: TestUser, Hand: ['Spades-Ace', 'Hearts-King'], Value: 21"
         )
       );
     });
@@ -228,7 +265,7 @@ describe("useSimpleJackGame Hook", () => {
 
       await waitFor(() =>
         expect(result.current.gameState.gameSummary).toBe(
-          "Winner: 2, Hand: ['Spades-Ace', 'Hearts-10'], Value: 21"
+          "Winner: Dealer, Hand: ['Spades-Ace', 'Hearts-10'], Value: 21"
         )
       );
     });

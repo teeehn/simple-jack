@@ -22,6 +22,7 @@ import {
 
 export function useSimpleJackGame(props?: IGameProps) {
   const gameDeck = props?.deck ? props.deck : generateDeck();
+  const playerName = props?.playerName ? props.playerName : undefined;
 
   // Validate the deck.
 
@@ -36,6 +37,7 @@ export function useSimpleJackGame(props?: IGameProps) {
     gameOver: false,
     highScore: 0,
     players: props?.players,
+    playerName,
     gameDeck,
   });
 
@@ -129,14 +131,17 @@ export function useSimpleJackGame(props?: IGameProps) {
       setTimeout(
         () =>
           setGameState(
-            createGameSummary({
-              ...gameState,
-              commentary: updatedCommentary,
-              gameOver: true,
-              highScore: SIMPLE_JACK_SCORE,
-              playerHands: updatedPlayerHands,
-              winner: updatedPlayerHands[i].playerId,
-            })
+            createGameSummary(
+              {
+                ...gameState,
+                commentary: updatedCommentary,
+                gameOver: true,
+                highScore: SIMPLE_JACK_SCORE,
+                playerHands: updatedPlayerHands,
+                winner: updatedPlayerHands[i].playerId,
+              },
+              getPlayerDisplayName
+            )
           ),
         gameState.dealingSpeed || EDealingSpeed.normal
       );
@@ -248,11 +253,14 @@ export function useSimpleJackGame(props?: IGameProps) {
       ) {
         if (gameDeck!.length <= 0) {
           setGameState(
-            createGameSummary({
-              ...gameState,
-              commentary,
-              gameOver: true,
-            })
+            createGameSummary(
+              {
+                ...gameState,
+                commentary,
+                gameOver: true,
+              },
+              getPlayerDisplayName
+            )
           );
         } else {
           dealCardToCurrentPlayer();
@@ -310,11 +318,14 @@ export function useSimpleJackGame(props?: IGameProps) {
         );
 
         setGameState(
-          createGameSummary({
-            ...gameState,
-            commentary: updatedCommentary,
-            winner: highScores[0].playerId,
-          })
+          createGameSummary(
+            {
+              ...gameState,
+              commentary: updatedCommentary,
+              winner: highScores[0].playerId,
+            },
+            getPlayerDisplayName
+          )
         );
       } else {
         // Push
@@ -322,11 +333,14 @@ export function useSimpleJackGame(props?: IGameProps) {
         // TODO: Add commentary here.
 
         setGameState(
-          createGameSummary({
-            ...gameState,
-            commentary,
-            winner: -1,
-          })
+          createGameSummary(
+            {
+              ...gameState,
+              commentary,
+              winner: -1,
+            },
+            getPlayerDisplayName
+          )
         );
       }
     }

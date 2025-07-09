@@ -57,6 +57,7 @@ export interface IGameState {
 
 export interface IGameProps {
   deck?: Card[];
+  playerName?: string;
   players?: number;
 }
 
