@@ -152,6 +152,21 @@ export default function Home() {
           </div>
         </div>
 
+        {/* Push Message */}
+        {gameState.gameOver && gameState.pushMessage && (
+          <div className="text-center mb-6">
+            <div className="bg-yellow-100 border-2 border-yellow-400 rounded-lg p-4 shadow-lg inline-block">
+              <div className="text-yellow-800 text-2xl font-bold mb-2">
+                PUSH
+              </div>
+              <div className="text-yellow-700 text-lg font-semibold">
+                {gameState.pushMessage.replace("Push - ", "")}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* User Controls */}
         {/* User Controls */}
         {canUserChoose && (
           <div className="text-center mb-6">

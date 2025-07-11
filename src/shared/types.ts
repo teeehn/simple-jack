@@ -44,14 +44,13 @@ export interface IGameState {
   currentPlayerIdx: number;
   dealingSpeed?: EDealingSpeed;
   gameDeck?: Card[];
-  gameSummary?: string | null;
   gameOver: boolean;
+  gameSummary?: string | null;
   highScore: number;
-  isEliminated?: boolean;
-  players?: number;
   playerHands?: PlayerHand[];
-  playerName?: string; // Add player name
-  userHasStood?: boolean; // Track if user has chosen to stand
+  playerName?: string;
+  players?: number;
+  pushMessage?: string;
   winner?: number;
 }
 

@@ -428,4 +428,117 @@ describe("Simple Jack Game UI", () => {
       );
     });
   });
+
+  describe("Push scenarios", () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      jest.clearAllMocks();
+    });
+
+    test("displays push message when players tie", async () => {
+      (useSimpleJackGame as jest.Mock).mockImplementation(() => {
+        const { useSimpleJackGame: testHook } = jest.requireActual(
+          "@/hooks/use-simple-jack"
+        );
+
+        const deck = generateMockDeck({
+          "1": ["Spades-King", "Hearts-10"],
+          "2": ["Clubs-Queen", "Diamonds-10"],
+        });
+
+        return {
+          ...testHook({ deck }),
+        };
+      });
+
+      render(<Home />);
+
+      // Setup game
+      const nameInput = screen.getByLabelText(/your name/i);
+      await waitFor(() => userEvent.type(nameInput, "TestUser"));
+
+      const playerSelect = screen.getByLabelText("Number of Players (2-6):");
+      await waitFor(() =>
+        fireEvent.change(playerSelect, { target: { value: "2" } })
+      );
+
+      // Start game
+      const startButton = screen.getByRole("button", { name: "Start Game" });
+      userEvent.click(startButton);
+
+      // Let game complete
+      for (let timers = 0; timers < 10; timers += 1) {
+        await act(() => jest.runAllTimers());
+      }
+
+      // Check for push message
+      await waitFor(() => expect(screen.getByText("PUSH")).toBeInTheDocument());
+
+      await waitFor(() =>
+        expect(
+          screen.getByText(/TestUser and Dealer are tied with 20 points/i)
+        ).toBeInTheDocument()
+      );
+    });
+
+    test("displays push message when all players bust", async () => {
+      (useSimpleJackGame as jest.Mock).mockImplementation(() => {
+        const { useSimpleJackGame: testHook } = jest.requireActual(
+          "@/hooks/use-simple-jack"
+        );
+
+        const deck = generateMockDeck({
+          "1": ["Spades-King", "Hearts-5", "Diamonds-7"],
+          "2": ["Clubs-Queen", "Spades-6", "Hearts-8"],
+        });
+
+        return {
+          ...testHook({ deck }),
+        };
+      });
+
+      render(<Home />);
+
+      // Setup game
+      const nameInput = screen.getByLabelText(/your name/i);
+      await waitFor(() => userEvent.type(nameInput, "TestUser"));
+
+      const playerSelect = screen.getByLabelText("Number of Players (2-6):");
+      await waitFor(() =>
+        fireEvent.change(playerSelect, { target: { value: "2" } })
+      );
+
+      // Start game
+      const startButton = screen.getByRole("button", { name: "Start Game" });
+      userEvent.click(startButton);
+
+      // Wait for user turn
+      for (let timers = 0; timers < 5; timers += 1) {
+        await act(() => jest.runAllTimers());
+      }
+
+      // User hits and busts
+      await waitFor(() => {
+        const hitButton = screen.getByRole("button", { name: "Hit me" });
+        userEvent.click(hitButton);
+      });
+
+      // Let game complete
+      for (let timers = 0; timers < 10; timers += 1) {
+        await act(() => jest.runAllTimers());
+      }
+
+      // Check for push message
+      await waitFor(() => expect(screen.getByText("PUSH")).toBeInTheDocument());
+
+      await waitFor(() =>
+        expect(screen.getByText(/All players have busted/i)).toBeInTheDocument()
+      );
+    });
+  });
 });
