@@ -167,7 +167,6 @@ export default function Home() {
         )}
 
         {/* User Controls */}
-        {/* User Controls */}
         {canUserChoose && (
           <div className="text-center mb-6">
             <div className="bg-white rounded-lg p-4 shadow-lg inline-block">

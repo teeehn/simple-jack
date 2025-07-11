@@ -476,13 +476,19 @@ describe("Simple Jack Game UI", () => {
         await act(() => jest.runAllTimers());
       }
 
+      const stand = screen.getByRole("button", { name: "Stand" });
+
+      expect(stand).toBeInTheDocument();
+
+      userEvent.click(stand);
+
       // Check for push message
       await waitFor(() => expect(screen.getByText("PUSH")).toBeInTheDocument());
 
       await waitFor(() =>
         expect(
-          screen.getByText(/TestUser and Dealer are tied with 20 points/i)
-        ).toBeInTheDocument()
+          screen.getAllByText(/TestUser and Dealer are tied with 20 points/i)
+        ).toHaveLength(2)
       );
     });
 
@@ -518,7 +524,7 @@ describe("Simple Jack Game UI", () => {
       userEvent.click(startButton);
 
       // Wait for user turn
-      for (let timers = 0; timers < 5; timers += 1) {
+      for (let timers = 0; timers < 10; timers += 1) {
         await act(() => jest.runAllTimers());
       }
 
@@ -537,7 +543,7 @@ describe("Simple Jack Game UI", () => {
       await waitFor(() => expect(screen.getByText("PUSH")).toBeInTheDocument());
 
       await waitFor(() =>
-        expect(screen.getByText(/All players have busted/i)).toBeInTheDocument()
+        expect(screen.getAllByText(/All players have busted/i)).toHaveLength(2)
       );
     });
   });
