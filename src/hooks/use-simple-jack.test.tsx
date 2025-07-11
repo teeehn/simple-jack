@@ -184,11 +184,51 @@ describe("useSimpleJackGame Hook", () => {
         expect(result.current.gameState.gameSummary).toBe(null)
       );
 
+      await waitFor(() =>
+        expect(result.current.gameState.pushMessage).toBe(
+          "Push - Player 2 and Dealer are tied with 20 points."
+        )
+      );
+
       const playerHands = result.current.gameState.playerHands;
 
       expect(playerHands![1].score).toBe(20);
 
       expect(playerHands![5].score).toBe(20);
+    });
+
+    test("All players bust scenario", async () => {
+      const deck: Card[] = generateMockDeck({
+        "1": ["Spades-King", "Hearts-5", "Diamonds-7"],
+        "2": ["Clubs-Queen", "Spades-6", "Hearts-8"],
+      });
+
+      const { result } = renderHook(() =>
+        useSimpleJackGame({ deck, players: 2, playerName: "TestUser" })
+      );
+
+      // Run all timers for initial dealing
+      for (let i = 0; i < 4; i += 1) {
+        act(() => jest.runAllTimers());
+      }
+
+      const { hitMe } = result.current;
+
+      // User hits and busts
+      await waitFor(() => hitMe());
+
+      // Run all remaining timers
+      for (let i = 0; i < 10; i += 1) {
+        act(() => jest.runAllTimers());
+      }
+
+      await waitFor(() =>
+        expect(result.current.gameState.pushMessage).toBe(
+          "Push - All players have busted."
+        )
+      );
+
+      await waitFor(() => expect(result.current.gameState.winner).toBe(-1));
     });
 
     test("Multiple Aces in each hand to evaluate. Player 2 wins with 21.", async () => {

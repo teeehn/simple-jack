@@ -303,45 +303,72 @@ export function useSimpleJackGame(props?: IGameProps) {
 
     if (gameOver && playerHands && !winner) {
       const activePlayers = playerHands.filter((hand) => !hand.isEliminated);
-      const highScores = activePlayers.filter(
-        (hand) => hand.score === highScore
-      );
 
-      if (highScores.length === 1) {
-        // We have a winner.
-
+      if (activePlayers.length === 0) {
+        // All players busted
         const updatedCommentary = [...commentary];
-        updatedCommentary.unshift(
-          `${getPlayerDisplayName(
-            highScores[0].playerId as number
-          )} wins with the highest score of ${highScores[0].score}!`
-        );
+        updatedCommentary.unshift("All players have busted!");
 
         setGameState(
           createGameSummary(
             {
               ...gameState,
               commentary: updatedCommentary,
-              winner: highScores[0].playerId,
+              winner: -1,
+              pushMessage: "Push - All players have busted.",
             },
             getPlayerDisplayName
           )
         );
       } else {
-        // Push
-
-        // TODO: Add commentary here.
-
-        setGameState(
-          createGameSummary(
-            {
-              ...gameState,
-              commentary,
-              winner: -1,
-            },
-            getPlayerDisplayName
-          )
+        const highScores = activePlayers.filter(
+          (hand) => hand.score === highScore
         );
+
+        if (highScores.length === 1) {
+          // We have a winner.
+
+          const updatedCommentary = [...commentary];
+          updatedCommentary.unshift(
+            `${getPlayerDisplayName(
+              highScores[0].playerId as number
+            )} wins with the highest score of ${highScores[0].score}!`
+          );
+
+          setGameState(
+            createGameSummary(
+              {
+                ...gameState,
+                commentary: updatedCommentary,
+                winner: highScores[0].playerId,
+              },
+              getPlayerDisplayName
+            )
+          );
+        } else {
+          // Push - multiple players tied
+
+          const tiedPlayerNames = highScores
+            .map((hand) => getPlayerDisplayName(hand.playerId as number))
+            .join(" and ");
+
+          const updatedCommentary = [...commentary];
+          updatedCommentary.unshift(
+            `Push - ${tiedPlayerNames} are tied with ${highScore} points.`
+          );
+
+          setGameState(
+            createGameSummary(
+              {
+                ...gameState,
+                commentary: updatedCommentary,
+                winner: -1,
+                pushMessage: `Push - ${tiedPlayerNames} are tied with ${highScore} points.`,
+              },
+              getPlayerDisplayName
+            )
+          );
+        }
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
