@@ -482,6 +482,10 @@ describe("Simple Jack Game UI", () => {
 
       userEvent.click(stand);
 
+      for (let timers = 0; timers < 10; timers += 1) {
+        await act(() => jest.runAllTimers());
+      }
+
       // Check for push message
       await waitFor(() => expect(screen.getByText("PUSH")).toBeInTheDocument());
 
