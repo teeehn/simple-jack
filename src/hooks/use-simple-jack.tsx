@@ -81,15 +81,20 @@ export function useSimpleJackGame(props?: IGameProps) {
         }`
       );
 
+      // Force the next player transition immediately
       const nextPlayerIdx = 1 < gameState.players! ? 1 : 0;
 
-      setGameState({
-        ...gameState,
-        commentary,
-        currentPlayerIdx: nextPlayerIdx,
-        playerHands,
-        cardsDealtOnTurn: nextPlayerIdx === 0 ? 0 : gameState.cardsDealtOnTurn,
-      });
+      // Use the same timeout pattern as dealCardToCurrentPlayer to ensure proper state transition
+      setTimeout(() => {
+        setGameState({
+          ...gameState,
+          commentary,
+          currentPlayerIdx: nextPlayerIdx,
+          playerHands,
+          cardsDealtOnTurn:
+            nextPlayerIdx === 0 ? 0 : gameState.cardsDealtOnTurn,
+        });
+      }, gameState.dealingSpeed || 100);
     }
   };
 
@@ -223,14 +228,13 @@ export function useSimpleJackGame(props?: IGameProps) {
       currentPlayerIdx: i,
       gameDeck,
       gameOver,
-      highScore,
       playerHands,
       players,
       winner,
     } = gameState;
 
     if (!gameOver && playerHands) {
-      // Check if it's the user's turn and they have 2+ cards.
+      // Check if it's the user's turn and they have 2+ cards and haven't stood yet.
 
       const isUserTurn = i === 0;
       const userHand = playerHands[0];
@@ -242,8 +246,21 @@ export function useSimpleJackGame(props?: IGameProps) {
         !userHand.isEliminated;
 
       // If it's the user's turn and they can choose, wait for their decision.
+      // BUT if the user has stood, we should move to the next player immediately
 
       if (userCanChoose) {
+        return;
+      }
+
+      // Handle the case where user has stood but currentPlayerIdx hasn't updated yet
+      if (isUserTurn && userHand?.hasStood && i === 0) {
+        const nextPlayerIdx = 1 < players! ? 1 : 0;
+        setGameState({
+          ...gameState,
+          currentPlayerIdx: nextPlayerIdx,
+          cardsDealtOnTurn:
+            nextPlayerIdx === 0 ? 0 : gameState.cardsDealtOnTurn,
+        });
         return;
       }
 
@@ -321,8 +338,13 @@ export function useSimpleJackGame(props?: IGameProps) {
           )
         );
       } else {
+        // Find the actual highest score among active (non-eliminated) players
+        const actualHighScore = Math.max(
+          ...activePlayers.map((hand) => hand.score)
+        );
+
         const highScores = activePlayers.filter(
-          (hand) => hand.score === highScore
+          (hand) => hand.score === actualHighScore
         );
 
         if (highScores.length === 1) {
@@ -341,6 +363,7 @@ export function useSimpleJackGame(props?: IGameProps) {
                 ...gameState,
                 commentary: updatedCommentary,
                 winner: highScores[0].playerId,
+                highScore: actualHighScore,
               },
               getPlayerDisplayName
             )
@@ -354,7 +377,7 @@ export function useSimpleJackGame(props?: IGameProps) {
 
           const updatedCommentary = [...commentary];
           updatedCommentary.unshift(
-            `Push - ${tiedPlayerNames} are tied with ${highScore} points.`
+            `Push - ${tiedPlayerNames} are tied with ${actualHighScore} points.`
           );
 
           setGameState(
@@ -363,7 +386,8 @@ export function useSimpleJackGame(props?: IGameProps) {
                 ...gameState,
                 commentary: updatedCommentary,
                 winner: -1,
-                pushMessage: `Push - ${tiedPlayerNames} are tied with ${highScore} points.`,
+                pushMessage: `Push - ${tiedPlayerNames} are tied with ${actualHighScore} points.`,
+                highScore: actualHighScore,
               },
               getPlayerDisplayName
             )

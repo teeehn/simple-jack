@@ -309,5 +309,132 @@ describe("useSimpleJackGame Hook", () => {
         )
       );
     });
+
+    test("Bug: User stands with 12, dealer busts with 23, user should win", async () => {
+      const deck: Card[] = generateMockDeck({
+        "1": ["Spades-10", "Spades-2"],
+        "2": ["Spades-8", "Hearts-4", "Clubs-4", "Spades-7"],
+      });
+
+      const { result } = renderHook(() =>
+        useSimpleJackGame({ deck, players: 2, playerName: "TestUser" })
+      );
+
+      // Deal initial cards
+      for (let i = 0; i < 4; i += 1) {
+        act(() => jest.runAllTimers());
+      }
+
+      const { stand } = result.current;
+
+      // User stands with 12
+      await waitFor(() => stand());
+
+      // Let dealer play out and bust
+      for (let i = 0; i < 20; i += 1) {
+        act(() => jest.runAllTimers());
+      }
+
+      // User should win since dealer busted
+      await waitFor(() =>
+        expect(result.current.gameState.gameSummary).toBe(
+          "Winner: TestUser, Hand: ['Spades-10', 'Spades-2'], Value: 12"
+        )
+      );
+
+      // Verify dealer busted
+      await waitFor(() =>
+        expect(result.current.gameState.playerHands![1].score).toBe(23)
+      );
+      await waitFor(() =>
+        expect(result.current.gameState.playerHands![1].isEliminated).toBe(true)
+      );
+    });
+
+    test("Bug: Multiple players, only one doesn't bust, that player should win", async () => {
+      const deck: Card[] = generateMockDeck({
+        "1": ["Hearts-5", "Diamonds-6"], // Player 1: 11
+        "2": ["Spades-King", "Hearts-4", "Clubs-8"], // Player 2: 22 (bust)
+        "3": ["Clubs-Queen", "Spades-5", "Hearts-7"], // Dealer: 22 (bust)
+      });
+
+      const { result } = renderHook(() =>
+        useSimpleJackGame({ deck, players: 3, playerName: "TestUser" })
+      );
+
+      // Deal initial cards
+      for (let i = 0; i < 6; i += 1) {
+        act(() => jest.runAllTimers());
+      }
+
+      const { stand } = result.current;
+
+      // User stands with 11
+      await waitFor(() => stand());
+
+      // Let other players play out and bust
+      for (let i = 0; i < 10; i += 1) {
+        act(() => jest.runAllTimers());
+      }
+
+      // User should win since others busted
+      await waitFor(() =>
+        expect(result.current.gameState.gameSummary).toBe(
+          "Winner: TestUser, Hand: ['Hearts-5', 'Diamonds-6'], Value: 11"
+        )
+      );
+
+      // Verify others busted
+      await waitFor(() =>
+        expect(result.current.gameState.playerHands![1].isEliminated).toBe(true)
+      );
+      await waitFor(() =>
+        expect(result.current.gameState.playerHands![2].isEliminated).toBe(true)
+      );
+    });
+
+    test("Bug: User has low score but wins when dealer busts", async () => {
+      const deck: Card[] = generateMockDeck({
+        "1": ["Hearts-2", "Diamonds-3", "Clubs-2"], // Player: 7
+        "2": ["Spades-10", "Hearts-6", "Clubs-8"], // Dealer: 24 (bust)
+      });
+
+      const { result } = renderHook(() =>
+        useSimpleJackGame({ deck, players: 2, playerName: "TestUser" })
+      );
+
+      // Deal initial cards
+      for (let i = 0; i < 4; i += 1) {
+        act(() => jest.runAllTimers());
+      }
+
+      const { hitMe, stand } = result.current;
+
+      // User hits once to get 7, then stands
+      await waitFor(() => hitMe());
+      act(() => jest.runAllTimers());
+
+      await waitFor(() => stand());
+
+      // Let dealer play out and bust
+      for (let i = 0; i < 10; i += 1) {
+        act(() => jest.runAllTimers());
+      }
+
+      // User should win with 7 since dealer busted with 24
+      await waitFor(() =>
+        expect(result.current.gameState.gameSummary).toBe(
+          "Winner: TestUser, Hand: ['Hearts-2', 'Diamonds-3', 'Clubs-2'], Value: 7"
+        )
+      );
+
+      // Verify dealer busted
+      await waitFor(() =>
+        expect(result.current.gameState.playerHands![1].score).toBe(24)
+      );
+      await waitFor(() =>
+        expect(result.current.gameState.playerHands![1].isEliminated).toBe(true)
+      );
+    });
   });
 });
