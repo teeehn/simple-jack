@@ -1,119 +1,38 @@
 "use client";
 
 import { useState } from "react";
-
-import { EDealingSpeed } from "@/shared/types";
 import { useSimpleJackGame } from "@/hooks/use-simple-jack";
 import { Player } from "@/components/player";
+import { GameSetup } from "@/components/game-setup";
+import { GameControls } from "@/components/game-controls";
+import { EDealingSpeed } from "@/shared/types";
 
 export default function Home() {
-  const [numPlayers, setNumPlayers] = useState<number | undefined>();
-  const [playerName, setPlayerName] = useState<string>("");
-  const [dealingSpeed, setDealingSpeed] = useState<EDealingSpeed>(
-    EDealingSpeed.normal
-  );
-
-  const { gameState, resetGame, setGameState, hitMe, stand } =
+  const { gameState, newGame, setGameState, hitMe, stand } =
     useSimpleJackGame();
+  const [hasCompletedSetup, setHasCompletedSetup] = useState(false);
 
-  const startGame = (): void =>
+  const startGame = (config: {
+    playerName: string;
+    numPlayers: number;
+    dealingSpeed: EDealingSpeed;
+  }) => {
     setGameState({
       ...gameState,
-      dealingSpeed,
-      players: numPlayers,
-      playerName: playerName.trim() || "Player",
+      dealingSpeed: config.dealingSpeed,
+      players: config.numPlayers,
+      playerName: config.playerName,
     });
+    setHasCompletedSetup(true);
+  };
 
-  if (!gameState.players) {
-    return (
-      <div className="min-h-screen bg-green-800 flex items-center justify-center">
-        <div className="bg-white rounded-lg shadow-2xl p-8 max-w-md w-full">
-          <h1 className="text-4xl font-bold text-center mb-8 text-gray-800">
-            Simple Jack
-          </h1>
+  const changeSettings = () => {
+    setHasCompletedSetup(false);
+  };
 
-          <div className="mb-6">
-            <label
-              htmlFor="playerName"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Your Name:
-            </label>
-            <input
-              id="playerName"
-              type="text"
-              value={playerName}
-              onChange={(e) => setPlayerName(e.target.value)}
-              placeholder="Enter your name"
-              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
-            />
-          </div>
-
-          <div className="mb-6">
-            <label
-              htmlFor="numPlayers"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Number of Players (2-6):
-            </label>
-            <select
-              id="numPlayers"
-              value={numPlayers}
-              onChange={(e) => {
-                if (e.target.value) {
-                  setNumPlayers(parseInt(e.target.value));
-                } else {
-                  setNumPlayers(undefined);
-                }
-              }}
-              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
-            >
-              <option key={`select`} value={``}>
-                - select -
-              </option>
-              {[2, 3, 4, 5, 6].map((num) => (
-                <option key={num} value={num}>
-                  {num} Players
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="mb-6">
-            <label
-              htmlFor="dealingSpeed"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Dealing Speed:
-            </label>
-            <select
-              id="dealingSpeed"
-              value={dealingSpeed}
-              onChange={(e) => setDealingSpeed(parseInt(e.target.value))}
-              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
-            >
-              <option value={EDealingSpeed.fast}>
-                Fast ({`${EDealingSpeed.fast / 1000}s`})
-              </option>
-              <option value={EDealingSpeed.normal}>
-                Normal ({`${EDealingSpeed.normal / 1000}s`})
-              </option>
-              <option value={EDealingSpeed.slow}>
-                Slow ({`${EDealingSpeed.slow / 1000}s`})
-              </option>
-            </select>
-          </div>
-
-          <button
-            onClick={startGame}
-            disabled={!numPlayers || !playerName.trim()}
-            className="w-full bg-blue-600 text-white py-3 px-6 rounded-md hover:bg-blue-700 transition-colors font-semibold text-lg disabled:bg-gray-400 disabled:cursor-not-allowed"
-          >
-            Start Game
-          </button>
-        </div>
-      </div>
-    );
+  // Show setup screen only if user hasn't completed initial setup
+  if (!hasCompletedSetup || !gameState.players) {
+    return <GameSetup onStartGame={startGame} />;
   }
 
   const getPlayerDisplayName = (playerId: number) => {
@@ -128,112 +47,99 @@ export default function Home() {
 
   const isUserTurn = gameState.currentPlayerIdx === 0;
   const userHand = gameState.playerHands?.[0];
-  const canUserChoose =
+  const canUserChoose = Boolean(
     isUserTurn &&
-    !gameState.gameOver &&
-    userHand &&
-    userHand.cards.length >= 2 &&
-    !userHand.hasStood &&
-    !userHand.isEliminated;
+      !gameState.gameOver &&
+      userHand &&
+      userHand.cards.length >= 2 &&
+      !userHand.hasStood &&
+      !userHand.isEliminated
+  );
 
   return (
-    <div className="min-h-screen bg-green-800 p-4">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-6">
-          <h1 className="text-4xl font-bold text-white mb-2">Simple Jack</h1>
-          <div className="text-white text-lg">
-            {!gameState.gameOver && (
-              <span>
-                Dealing cards... Current player:{" "}
-                {getPlayerDisplayName(gameState.currentPlayerIdx + 1)}
-              </span>
-            )}
-            {gameState.gameOver && <span>Game Complete!</span>}
-          </div>
-        </div>
-
-        {/* Push Message */}
-        {gameState.gameOver && gameState.pushMessage && (
-          <div className="text-center mb-6">
-            <div className="bg-yellow-100 border-2 border-yellow-400 rounded-lg p-4 shadow-lg inline-block">
-              <div className="text-yellow-800 text-2xl font-bold mb-2">
-                PUSH
-              </div>
-              <div className="text-yellow-700 text-lg font-semibold">
-                {gameState.pushMessage.replace("Push - ", "")}
-              </div>
+    <div className="h-screen bg-gradient-to-br from-green-800 via-green-700 to-green-900 flex flex-col">
+      {/* Header with Game Status and Controls */}
+      <div className="flex-shrink-0 p-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-between mb-4">
+            {/* Game Title and Current Player */}
+            <div className="flex items-center space-x-6">
+              <h1 className="text-3xl font-bold text-white drop-shadow-lg">
+                🃏 Simple Jack
+              </h1>
+              {!Boolean(gameState.gameOver) && gameState.playerHands && (
+                <div className="bg-black bg-opacity-30 backdrop-blur-sm rounded-lg px-4 py-2">
+                  <div className="text-white text-sm font-semibold">
+                    <span className="flex items-center space-x-2">
+                      <span className="animate-pulse">🎯</span>
+                      <span>
+                        Current:{" "}
+                        {getPlayerDisplayName(gameState.currentPlayerIdx + 1)}
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              )}
+              {gameState.pushMessage && (
+                <div className="bg-yellow-500 text-yellow-900 px-4 py-2 rounded-lg font-bold">
+                  PUSH
+                </div>
+              )}
             </div>
-          </div>
-        )}
 
-        {/* User Controls */}
-        {canUserChoose && (
-          <div className="text-center mb-6">
-            <div className="bg-white rounded-lg p-4 shadow-lg inline-block">
-              <p className="text-gray-800 mb-4 font-semibold">
-                {gameState.playerName}, it&apos;s your turn! What would you like
-                to do?
-              </p>
-              <div className="space-x-4">
-                <button
-                  onClick={hitMe}
-                  className="bg-red-600 text-white py-2 px-6 rounded-md hover:bg-red-700 transition-colors font-semibold"
-                >
-                  Hit me
-                </button>
-                <button
-                  onClick={stand}
-                  className="bg-blue-600 text-white py-2 px-6 rounded-md hover:bg-blue-700 transition-colors font-semibold"
-                >
-                  Stand
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Players Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {gameState.playerHands &&
-            gameState.playerHands.map((player) => (
-              <Player
-                key={player.playerId}
-                hand={player}
-                winner={gameState.winner}
-                isCurrentPlayer={
-                  gameState.currentPlayerIdx === player.playerId! - 1
-                }
-                isGameOver={gameState.gameOver}
-                displayName={getPlayerDisplayName(player.playerId!)}
+            {/* Game Controls */}
+            <div className="flex-shrink-0">
+              <GameControls
+                canUserChoose={canUserChoose}
+                onHit={hitMe}
+                onStand={stand}
+                gameOver={Boolean(gameState.gameOver)}
+                onNewGame={newGame}
+                onChangeSettings={changeSettings}
               />
-            ))}
-        </div>
+            </div>
+          </div>
 
-        {/* Commentary */}
-        <div className="bg-white rounded-lg p-6 shadow-lg mb-6">
-          <h3 className="text-xl font-bold text-gray-800 mb-4">
-            Game Commentary
-          </h3>
-          <div className="max-h-40 overflow-y-auto space-y-2">
-            {gameState.commentary.map((comment, index) => (
-              <div key={index} className="text-gray-700 p-2 bg-gray-50 rounded">
-                {comment}
+          {/* Commentary - Compact horizontal scrolling */}
+          {gameState.commentary && gameState.commentary.length > 0 && (
+            <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-3">
+              <div className="flex items-center space-x-4 overflow-x-auto scrollbar-thin scrollbar-thumb-white scrollbar-track-transparent">
+                <span className="text-white text-sm font-semibold flex-shrink-0">
+                  📢
+                </span>
+                {gameState.commentary.slice(0, 3).map((comment, index) => (
+                  <div
+                    key={index}
+                    className="text-white text-sm bg-black bg-opacity-20 px-3 py-1 rounded-full flex-shrink-0"
+                  >
+                    {comment}
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Players Grid - Takes remaining space */}
+      <div className="flex-1 overflow-auto p-4 pt-0">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 h-full">
+            {gameState.playerHands &&
+              gameState.playerHands.map((player) => (
+                <Player
+                  key={player.playerId}
+                  hand={player}
+                  winner={gameState.winner}
+                  isCurrentPlayer={
+                    gameState.currentPlayerIdx === player.playerId! - 1
+                  }
+                  isGameOver={Boolean(gameState.gameOver)}
+                  displayName={getPlayerDisplayName(player.playerId!)}
+                />
+              ))}
           </div>
         </div>
-
-        {/* Game Controls */}
-        {gameState.gameOver && (
-          <div className="text-center">
-            <button
-              onClick={resetGame}
-              className="bg-blue-600 text-white py-3 px-8 rounded-md hover:bg-blue-700 transition-colors font-semibold text-lg"
-            >
-              Play New Game
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );
