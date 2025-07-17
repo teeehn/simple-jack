@@ -24,8 +24,8 @@ describe("Player", () => {
     render(<Player hand={mockHand} />);
     expect(screen.getByTestId("player-2")).toBeInTheDocument();
     expect(screen.getByText(/Player 2/)).toBeInTheDocument();
-    expect(screen.getByText("♠")).toBeInTheDocument();
-    expect(screen.getByText("Ace")).toBeInTheDocument();
+    expect(screen.getAllByText("♠")).toHaveLength(3); // Card shows suit symbol 3 times (top-left, center, bottom-right)
+    expect(screen.getAllByText("Ace")).toHaveLength(2); // Card shows value 2 times (top-left, bottom-right)
     expect(screen.getByText("11")).toBeInTheDocument();
   });
 });

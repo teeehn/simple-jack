@@ -47,16 +47,39 @@ export function useSimpleJackGame(props?: IGameProps) {
     const gameDeck = generateDeck();
     validateDeck(gameDeck);
 
-    // Reset the game state.
+    // Reset the game state but preserve player settings.
 
-    setGameState({
-      cardsDealtOnTurn: 0,
-      commentary: [],
-      currentPlayerIdx: 0,
-      gameOver: false,
-      highScore: 0,
-      gameDeck,
+    setGameState((prevState) => {
+      // Initialize fresh player hands
+      const playerHands: PlayerHand[] = prevState.players
+        ? Array.from({ length: prevState.players }, (_, i) =>
+            playerCardHand(i + 1)
+          )
+        : [];
+
+      return {
+        cardsDealtOnTurn: 0,
+        commentary: [],
+        currentPlayerIdx: 0,
+        gameOver: false,
+        highScore: 0,
+        gameDeck,
+        // Preserve these settings from previous game
+        players: prevState.players,
+        playerName: prevState.playerName,
+        dealingSpeed: prevState.dealingSpeed,
+        // Initialize fresh player hands immediately
+        playerHands: prevState.players ? playerHands : undefined,
+        // Clear game-specific state
+        winner: undefined,
+        pushMessage: undefined,
+        gameSummary: undefined,
+      };
     });
+  };
+
+  const newGame = () => {
+    resetGame();
   };
 
   const getPlayerDisplayName = (playerId: number) => {
@@ -401,6 +424,7 @@ export function useSimpleJackGame(props?: IGameProps) {
   return {
     gameState,
     resetGame,
+    newGame,
     setGameState,
     hitMe,
     stand,
