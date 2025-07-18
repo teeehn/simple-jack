@@ -45,6 +45,12 @@ export interface IGameState {
   dealingSpeed?: EDealingSpeed;
   gameDeck?: Card[];
   gameOver: boolean;
+  // Object to hold the game settings.
+  gameSettings?: {
+    dealingSpeed?: EDealingSpeed;
+    playerName?: string;
+    players?: number;
+  };
   gameSummary?: string | null;
   highScore: number;
   playerHands?: PlayerHand[];

@@ -1,19 +1,35 @@
 import { useState } from "react";
-import { EDealingSpeed } from "@/shared/types";
+import { EDealingSpeed, IGameState } from "@/shared/types";
 
 interface GameSetupProps {
+  isGameStart?: boolean;
+  gameState: IGameState;
   onStartGame: (config: {
     playerName: string;
     numPlayers: number;
     dealingSpeed: EDealingSpeed;
   }) => void;
+  setGameSettings: (gameSettings: {
+    dealingSpeed?: EDealingSpeed;
+    playerName?: string;
+    players?: number;
+  }) => void;
 }
 
-export function GameSetup({ onStartGame }: GameSetupProps) {
-  const [numPlayers, setNumPlayers] = useState<number | undefined>();
-  const [playerName, setPlayerName] = useState<string>("");
+export function GameSetup({
+  isGameStart,
+  gameState,
+  onStartGame,
+  setGameSettings,
+}: GameSetupProps) {
+  const [numPlayers, setNumPlayers] = useState<number | undefined>(
+    gameState?.players
+  );
+  const [playerName, setPlayerName] = useState<string>(
+    gameState.playerName || ""
+  );
   const [dealingSpeed, setDealingSpeed] = useState<EDealingSpeed>(
-    EDealingSpeed.normal
+    gameState.dealingSpeed || EDealingSpeed.normal
   );
 
   const handleStartGame = () => {
@@ -21,6 +37,16 @@ export function GameSetup({ onStartGame }: GameSetupProps) {
       onStartGame({
         playerName: playerName.trim(),
         numPlayers,
+        dealingSpeed,
+      });
+    }
+  };
+
+  const handleSaveSettings = () => {
+    if (numPlayers && playerName.trim()) {
+      setGameSettings({
+        playerName: playerName.trim(),
+        players: numPlayers,
         dealingSpeed,
       });
     }
@@ -113,27 +139,51 @@ export function GameSetup({ onStartGame }: GameSetupProps) {
             </select>
           </div>
 
-          <button
-            onClick={handleStartGame}
-            disabled={!isFormValid}
-            className={`w-full py-4 px-6 rounded-xl font-bold text-lg transition-all duration-300 shadow-lg hover:shadow-xl transform ${
-              isFormValid
-                ? "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white hover:scale-105 active:scale-95"
-                : "bg-gray-400 text-gray-600 cursor-not-allowed"
-            }`}
-          >
-            {isFormValid ? (
-              <span className="flex items-center justify-center space-x-2">
-                <span>🚀</span>
-                <span>Start Game</span>
-              </span>
-            ) : (
-              <span className="flex items-center justify-center space-x-2">
-                <span>⏳</span>
-                <span>Fill in all fields</span>
-              </span>
-            )}
-          </button>
+          {isGameStart ? (
+            <button
+              onClick={handleStartGame}
+              disabled={!isFormValid}
+              className={`w-full py-4 px-6 rounded-xl font-bold text-lg transition-all duration-300 shadow-lg hover:shadow-xl transform ${
+                isFormValid
+                  ? "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white hover:scale-105 active:scale-95"
+                  : "bg-gray-400 text-gray-600 cursor-not-allowed"
+              }`}
+            >
+              {isFormValid ? (
+                <span className="flex items-center justify-center space-x-2">
+                  <span>🚀</span>
+                  <span>Start Game</span>
+                </span>
+              ) : (
+                <span className="flex items-center justify-center space-x-2">
+                  <span>⏳</span>
+                  <span>Fill in all fields</span>
+                </span>
+              )}
+            </button>
+          ) : (
+            <button
+              onClick={handleSaveSettings}
+              disabled={!isFormValid}
+              className={`w-full py-4 px-6 rounded-xl font-bold text-lg transition-all duration-300 shadow-lg hover:shadow-xl transform ${
+                isFormValid
+                  ? "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white hover:scale-105 active:scale-95"
+                  : "bg-gray-400 text-gray-600 cursor-not-allowed"
+              }`}
+            >
+              {isFormValid ? (
+                <span className="flex items-center justify-center space-x-2">
+                  <span>✅</span>
+                  <span>Save Game Settings</span>
+                </span>
+              ) : (
+                <span className="flex items-center justify-center space-x-2">
+                  <span>⏳</span>
+                  <span>Fill in all fields</span>
+                </span>
+              )}
+            </button>
+          )}
         </div>
 
         <div className="mt-8 text-center">

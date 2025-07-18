@@ -26,13 +26,32 @@ export default function Home() {
     setHasCompletedSetup(true);
   };
 
+  const setGameSettings = (gameSettings: {
+    dealingSpeed?: EDealingSpeed;
+    playerName?: string;
+    players?: number;
+  }) => {
+    setGameState({
+      ...gameState,
+      gameSettings,
+    });
+    setHasCompletedSetup(true);
+  };
+
   const changeSettings = () => {
     setHasCompletedSetup(false);
   };
 
   // Show setup screen only if user hasn't completed initial setup
   if (!hasCompletedSetup || !gameState.players) {
-    return <GameSetup onStartGame={startGame} />;
+    return (
+      <GameSetup
+        gameState={gameState}
+        isGameStart={!gameState.players}
+        onStartGame={startGame}
+        setGameSettings={setGameSettings}
+      />
+    );
   }
 
   const getPlayerDisplayName = (playerId: number) => {

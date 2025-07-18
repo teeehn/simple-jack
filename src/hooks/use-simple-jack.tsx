@@ -74,6 +74,8 @@ export function useSimpleJackGame(props?: IGameProps) {
         winner: undefined,
         pushMessage: undefined,
         gameSummary: undefined,
+        // Updates the settings
+        ...prevState?.gameSettings,
       };
     });
   };
