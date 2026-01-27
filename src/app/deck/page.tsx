@@ -5,7 +5,21 @@ import { generateMockDeck } from "@/lib/utils/mock-deck-generator";
 import { Card, TestCase } from "@/shared/types";
 
 const VALID_SUITS = ["Clubs", "Diamonds", "Hearts", "Spades"];
-const VALID_VALUES = ["Ace", "King", "Queen", "Jack", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
+const VALID_VALUES = [
+  "Ace",
+  "King",
+  "Queen",
+  "Jack",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10",
+];
 const MIN_PLAYERS = 2;
 const MAX_PLAYERS = 6;
 
@@ -23,7 +37,7 @@ const parseCards = (input: string): string[] => {
     .filter((card) => card);
 };
 
-export default function Admin() {
+export default function Deck() {
   const [generatedDeck, setGeneratedDeck] = useState<Card[] | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -84,7 +98,9 @@ export default function Admin() {
 
   const handleCopy = async () => {
     if (generatedDeck) {
-      await navigator.clipboard.writeText(JSON.stringify(generatedDeck, null, 2));
+      await navigator.clipboard.writeText(
+        JSON.stringify(generatedDeck, null, 2),
+      );
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
@@ -138,7 +154,9 @@ export default function Admin() {
       setTestDeck(deck);
       setTestDeckCopied(false);
     } catch (error) {
-      setTestDeckError(error instanceof Error ? error.message : "An error occurred");
+      setTestDeckError(
+        error instanceof Error ? error.message : "An error occurred",
+      );
     }
   };
 
@@ -165,11 +183,14 @@ export default function Admin() {
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6">Admin - Mock Deck Generator</h1>
+        <h1 className="text-3xl font-bold text-gray-800 mb-6">
+          Admin - Mock Deck Generator
+        </h1>
 
         <div className="bg-white rounded-lg shadow-md p-6">
           <p className="text-gray-600 mb-4">
-            Generate a full shuffled deck of 52 cards. Click the button below to create a new randomized deck.
+            Generate a full shuffled deck of 52 cards. Click the button below to
+            create a new randomized deck.
           </p>
 
           <button
@@ -207,10 +228,16 @@ export default function Admin() {
 
         {/* Test Deck Generator Section */}
         <div className="bg-white rounded-lg shadow-md p-6 mt-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">Test Deck Generator</h2>
+          <h2 className="text-xl font-bold text-gray-800 mb-4">
+            Test Deck Generator
+          </h2>
           <p className="text-gray-600 mb-4">
-            Generate a test deck with specific cards for each player. Enter comma-separated card values
-            (e.g., <code className="bg-gray-100 px-1 rounded">Spades-Ace, Hearts-King, Clubs-10</code>).
+            Generate a test deck with specific cards for each player. Enter
+            comma-separated card values (e.g.,{" "}
+            <code className="bg-gray-100 px-1 rounded">
+              Spades-Ace, Hearts-King, Clubs-10
+            </code>
+            ).
           </p>
 
           <div className="space-y-3 mb-4">
@@ -223,13 +250,15 @@ export default function Admin() {
                   <input
                     type="text"
                     value={input}
-                    onChange={(e) => handlePlayerInputChange(index, e.target.value)}
+                    onChange={(e) =>
+                      handlePlayerInputChange(index, e.target.value)
+                    }
                     onBlur={() => handlePlayerInputBlur(index)}
                     placeholder="Spades-Ace, Hearts-King, Clubs-10"
                     className={`flex-1 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 ${
-                      touchedFields.has(index) && validation.errors[index]
-                        ? "border-red-500 bg-red-50"
-                        : "border-gray-300"
+                      touchedFields.has(index) && validation.errors[index] ?
+                        "border-red-500 bg-red-50"
+                      : "border-gray-300"
                     }`}
                   />
                   {playerInputs.length > MIN_PLAYERS && (
@@ -268,9 +297,9 @@ export default function Admin() {
               onClick={handleGenerateTestDeck}
               disabled={validation.hasErrors}
               className={`font-semibold py-2 px-6 rounded-lg transition-colors ${
-                validation.hasErrors
-                  ? "bg-blue-300 cursor-not-allowed text-white"
-                  : "bg-blue-600 hover:bg-blue-700 text-white"
+                validation.hasErrors ?
+                  "bg-blue-300 cursor-not-allowed text-white"
+                : "bg-blue-600 hover:bg-blue-700 text-white"
               }`}
             >
               Generate Test Deck
