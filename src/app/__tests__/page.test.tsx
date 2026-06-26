@@ -113,7 +113,7 @@ describe("Simple Jack Game UI", () => {
 
       // Should transition to game screen
       await waitFor(() =>
-        expect(screen.getByText(/current player/i)).toBeInTheDocument()
+        expect(screen.getByText(/current:/i)).toBeInTheDocument()
       );
 
       act(() => jest.runAllTimers());
@@ -163,8 +163,13 @@ describe("Simple Jack Game UI", () => {
         expect(screen.getByText(/simple jack/i)).toBeInTheDocument()
       );
       await waitFor(() =>
-        expect(screen.getByText(/current player/i)).toBeInTheDocument()
+        expect(screen.getByText(/current:/i)).toBeInTheDocument()
       );
+
+      for (let i = 0; i < 5; i += 1) {
+        await act(() => jest.runAllTimers());
+      }
+
       await waitFor(() => expect(screen.getByText("📢")).toBeInTheDocument());
     });
 
@@ -255,6 +260,10 @@ describe("Simple Jack Game UI", () => {
       const startButton = screen.getByRole("button", { name: /start game/i });
       userEvent.click(startButton);
 
+      for (let i = 0; i < 5; i += 1) {
+        await act(() => jest.runAllTimers());
+      }
+
       await waitFor(() => expect(screen.getByText("📢")).toBeInTheDocument());
     });
   });
@@ -295,7 +304,7 @@ describe("Simple Jack Game UI", () => {
       userEvent.click(startButton);
 
       await waitFor(() =>
-        expect(screen.getByText(/current player/i)).toBeInTheDocument()
+        expect(screen.getByText(/current:/i)).toBeInTheDocument()
       );
     });
   });
@@ -352,7 +361,7 @@ describe("Simple Jack Game UI", () => {
       // Wait for game to pause for the user to decide to hit or stand.
 
       await waitFor(() =>
-        expect(screen.getByText(/your turn/i)).toBeInTheDocument()
+        expect(screen.getByText("TURN")).toBeInTheDocument()
       );
 
       await waitFor(() =>
