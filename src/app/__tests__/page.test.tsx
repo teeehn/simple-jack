@@ -444,6 +444,98 @@ describe("Simple Jack Game UI", () => {
     });
   });
 
+  describe("Settings retention", () => {
+    beforeEach(async () => {
+      jest.useFakeTimers();
+
+      (useSimpleJackGame as jest.Mock).mockImplementation(() => {
+        const { useSimpleJackGame: testHook } = jest.requireActual(
+          "@/hooks/use-simple-jack"
+        );
+
+        // Blackjack on first deal — game ends without user input
+        const deck = generateMockDeck({
+          "1": ["Spades-Ace", "Spades-King"],
+          "2": ["Clubs-10", "Hearts-7"],
+        });
+
+        return {
+          ...testHook({ deck }),
+        };
+      });
+
+      render(<Home />);
+
+      const nameInput = screen.getByLabelText(/your name/i);
+      await waitFor(() => userEvent.type(nameInput, "TestUser"));
+
+      const playerSelect = screen.getByRole("combobox", {
+        name: /number of players/i,
+      });
+      await waitFor(() =>
+        fireEvent.change(playerSelect, { target: { value: "3" } })
+      );
+
+      const speedSelect = screen.getByRole("combobox", {
+        name: /dealing speed/i,
+      });
+      await waitFor(() =>
+        fireEvent.change(speedSelect, { target: { value: "1000" } })
+      );
+
+      const startButton = screen.getByRole("button", { name: /start game/i });
+      userEvent.click(startButton);
+
+      for (let timers = 0; timers < 6; timers += 1) {
+        await act(() => jest.runAllTimers());
+      }
+
+      await waitFor(() =>
+        expect(
+          screen.getByRole("button", { name: /play new game/i })
+        ).toBeInTheDocument()
+      );
+
+      // Open settings
+      const settingsButton = screen.getByRole("button", { name: /settings/i });
+      userEvent.click(settingsButton);
+    });
+
+    afterEach(() => {
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      jest.clearAllMocks();
+    });
+
+    test("retains player name on the settings screen", async () => {
+      const nameInput = screen.getByLabelText(/your name/i);
+      expect(nameInput).toHaveValue("TestUser");
+    });
+
+    test("retains number of players on the settings screen", async () => {
+      const playerSelect = screen.getByRole("combobox", {
+        name: /number of players/i,
+      });
+      expect(playerSelect).toHaveValue("3");
+    });
+
+    test("retains dealing speed on the settings screen", async () => {
+      const speedSelect = screen.getByRole("combobox", {
+        name: /dealing speed/i,
+      });
+      expect(speedSelect).toHaveValue("1000");
+    });
+
+    test("shows an enabled Start Game button with retained settings", async () => {
+      expect(
+        screen.getByRole("button", { name: /start game/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: /fill in all fields/i })
+      ).not.toBeInTheDocument();
+    });
+  });
+
   describe("Push scenarios", () => {
     beforeEach(() => {
       jest.useFakeTimers();
