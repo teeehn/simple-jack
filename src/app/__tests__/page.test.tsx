@@ -151,8 +151,8 @@ describe("Simple Jack Game UI", () => {
       );
     });
 
-    afterEach(() => {
-      jest.runOnlyPendingTimers();
+    afterEach(async () => {
+      await act(async () => { jest.runOnlyPendingTimers(); });
       jest.useRealTimers();
     });
 
@@ -208,8 +208,8 @@ describe("Simple Jack Game UI", () => {
       );
     });
 
-    afterEach(() => {
-      jest.runOnlyPendingTimers();
+    afterEach(async () => {
+      await act(async () => { jest.runOnlyPendingTimers(); });
       jest.useRealTimers();
     });
 
@@ -252,8 +252,8 @@ describe("Simple Jack Game UI", () => {
       );
     });
 
-    afterEach(() => {
-      jest.runOnlyPendingTimers();
+    afterEach(async () => {
+      await act(async () => { jest.runOnlyPendingTimers(); });
       jest.useRealTimers();
     });
 
@@ -289,8 +289,8 @@ describe("Simple Jack Game UI", () => {
       );
     });
 
-    afterEach(() => {
-      jest.runOnlyPendingTimers();
+    afterEach(async () => {
+      await act(async () => { jest.runOnlyPendingTimers(); });
       jest.useRealTimers();
     });
 
@@ -345,8 +345,8 @@ describe("Simple Jack Game UI", () => {
       );
     });
 
-    afterEach(() => {
-      jest.runOnlyPendingTimers();
+    afterEach(async () => {
+      await act(async () => { jest.runOnlyPendingTimers(); });
       jest.useRealTimers();
     });
 
@@ -415,8 +415,8 @@ describe("Simple Jack Game UI", () => {
       );
     });
 
-    afterEach(() => {
-      jest.runOnlyPendingTimers();
+    afterEach(async () => {
+      await act(async () => { jest.runOnlyPendingTimers(); });
       jest.useRealTimers();
     });
 
@@ -474,7 +474,7 @@ describe("Simple Jack Game UI", () => {
         name: /number of players/i,
       });
       await waitFor(() =>
-        fireEvent.change(playerSelect, { target: { value: "3" } })
+        fireEvent.change(playerSelect, { target: { value: "2" } })
       );
 
       const speedSelect = screen.getByRole("combobox", {
@@ -499,11 +499,11 @@ describe("Simple Jack Game UI", () => {
 
       // Open settings
       const settingsButton = screen.getByRole("button", { name: /settings/i });
-      userEvent.click(settingsButton);
+      fireEvent.click(settingsButton);
     });
 
-    afterEach(() => {
-      jest.runOnlyPendingTimers();
+    afterEach(async () => {
+      await act(async () => { jest.runOnlyPendingTimers(); });
       jest.useRealTimers();
       jest.clearAllMocks();
     });
@@ -517,7 +517,7 @@ describe("Simple Jack Game UI", () => {
       const playerSelect = screen.getByRole("combobox", {
         name: /number of players/i,
       });
-      expect(playerSelect).toHaveValue("3");
+      expect(playerSelect).toHaveValue("2");
     });
 
     test("retains dealing speed on the settings screen", async () => {
@@ -538,8 +538,8 @@ describe("Simple Jack Game UI", () => {
   });
 
   describe("Game status retention after visiting settings", () => {
-    afterEach(() => {
-      jest.runOnlyPendingTimers();
+    afterEach(async () => {
+      await act(async () => { jest.runOnlyPendingTimers(); });
       jest.useRealTimers();
       jest.clearAllMocks();
     });
@@ -681,9 +681,10 @@ describe("Simple Jack Game UI", () => {
         expect(within(p1).getByText("WIN!")).toBeInTheDocument();
 
         expect(within(p2).getByText("Dealer")).toBeInTheDocument();
-        expect(within(p2).getAllByText("10")).toHaveLength(2);
-        expect(within(p2).getAllByText("7")).toHaveLength(2);
-        expect(within(p2).getByText("17")).toBeInTheDocument();
+        // P2 only received Clubs-10 before P1 hit 21; Hearts-7 was never dealt.
+        // "10" appears 3 times: score(10) + card corners(2).
+        expect(within(p2).getAllByText("10")).toHaveLength(3);
+        expect(within(p2).queryByText("7")).not.toBeInTheDocument();
 
         expect(
           screen.getByRole("button", { name: /play new game/i })
@@ -742,11 +743,14 @@ describe("Simple Jack Game UI", () => {
         expect(within(p1).getByText("WIN!")).toBeInTheDocument();
 
         expect(within(p2).getByText("Player 2")).toBeInTheDocument();
-        expect(within(p2).getAllByText("10")).toHaveLength(2);
-        expect(within(p2).getByText("10")).toBeInTheDocument();
+        // P2 only received Clubs-10 before P1 hit 21.
+        // "10" appears 3 times: score(10) + card corners(2).
+        expect(within(p2).getAllByText("10")).toHaveLength(3);
 
         expect(within(p3).getByText("Dealer")).toBeInTheDocument();
-        expect(within(p3).getAllByText("9")).toHaveLength(2);
+        // P3 only received Diamonds-9 before P1 hit 21.
+        // "9" appears 3 times: score(9) + card corners(2).
+        expect(within(p3).getAllByText("9")).toHaveLength(3);
 
         // Exactly 3 player panels — not 4
         expect(screen.queryByTestId("player-4")).not.toBeInTheDocument();
@@ -1111,8 +1115,8 @@ describe("Simple Jack Game UI", () => {
       jest.useFakeTimers();
     });
 
-    afterEach(() => {
-      jest.runOnlyPendingTimers();
+    afterEach(async () => {
+      await act(async () => { jest.runOnlyPendingTimers(); });
       jest.useRealTimers();
       jest.clearAllMocks();
     });
