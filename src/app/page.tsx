@@ -21,12 +21,32 @@ export default function Home() {
   const [savedSettings, setSavedSettings] = useState<GameSettings | null>(null);
 
   const startGame = (config: GameSettings) => {
-    setGameState({
-      ...gameState,
-      dealingSpeed: config.dealingSpeed,
-      players: config.numPlayers,
-      playerName: config.playerName,
-    });
+    if (gameState.gameOver && config.numPlayers !== gameState.players) {
+      // When the player count changes on a completed game, useEffect([players])
+      // resets playerHands but leaves gameOver=true, freezing the game loop.
+      // Reset game-over state so the loop restarts with the new count.
+      setGameState({
+        ...gameState,
+        dealingSpeed: config.dealingSpeed,
+        players: config.numPlayers,
+        playerName: config.playerName,
+        cardsDealtOnTurn: 0,
+        commentary: [],
+        currentPlayerIdx: 0,
+        gameOver: false,
+        gameSummary: undefined,
+        highScore: 0,
+        pushMessage: undefined,
+        winner: undefined,
+      });
+    } else {
+      setGameState({
+        ...gameState,
+        dealingSpeed: config.dealingSpeed,
+        players: config.numPlayers,
+        playerName: config.playerName,
+      });
+    }
     setSavedSettings(config);
     setHasStarted(true);
     setIsViewingSettings(false);
