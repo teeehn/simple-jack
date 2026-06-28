@@ -1072,6 +1072,162 @@ describe("Simple Jack Game UI", () => {
       assertState();
     });
 
+    // ─── scenario 7: 4-player game, decrease to 2 in settings, cancel ───────
+    //
+    // P4 (Dealer) wins with Ace+10=21 in round 2 before the loop returns to
+    // P1 — no user decision is needed.
+    // P1=King+9=19, P2=8+Jack=18, P3=7+Queen=17, P4=Ace+10=21 (WIN)
+
+    test("4-player dealer-blackjack result is identical before and after settings where number of players was decreased to 2", async () => {
+      jest.useFakeTimers();
+
+      (useSimpleJackGame as jest.Mock).mockImplementation(() => {
+        const { useSimpleJackGame: testHook } = jest.requireActual(
+          "@/hooks/use-simple-jack"
+        );
+        return {
+          ...testHook({
+            deck: generateMockDeck({
+              "1": ["Spades-King", "Hearts-9"],
+              "2": ["Clubs-8", "Diamonds-Jack"],
+              "3": ["Hearts-7", "Clubs-Queen"],
+              "4": ["Diamonds-Ace", "Spades-10"],
+            }),
+          }),
+        };
+      });
+
+      render(<Home />);
+      await startSetup("4");
+      await runTimers(15);
+
+      await waitFor(() =>
+        expect(screen.getByText("WIN!")).toBeInTheDocument()
+      );
+
+      const assertState = () => {
+        const p1 = screen.getByTestId("player-1");
+        const p2 = screen.getByTestId("player-2");
+        const p3 = screen.getByTestId("player-3");
+        const p4 = screen.getByTestId("player-4");
+
+        expect(within(p1).getByText("TestUser")).toBeInTheDocument();
+        expect(within(p1).getAllByText("King")).toHaveLength(2);
+        expect(within(p1).getAllByText("9")).toHaveLength(2);
+        expect(within(p1).getByText("19")).toBeInTheDocument();
+        expect(within(p1).queryByText("WIN!")).not.toBeInTheDocument();
+
+        expect(within(p2).getByText("Player 2")).toBeInTheDocument();
+        expect(within(p2).getAllByText("8")).toHaveLength(2);
+        expect(within(p2).getAllByText("Jack")).toHaveLength(2);
+        expect(within(p2).getByText("18")).toBeInTheDocument();
+
+        expect(within(p3).getByText("Player 3")).toBeInTheDocument();
+        expect(within(p3).getAllByText("7")).toHaveLength(2);
+        expect(within(p3).getAllByText("Queen")).toHaveLength(2);
+        expect(within(p3).getByText("17")).toBeInTheDocument();
+
+        expect(within(p4).getByText("Dealer")).toBeInTheDocument();
+        expect(within(p4).getAllByText("Ace")).toHaveLength(2);
+        // "10" appears twice as card corners; score is "21", not "10"
+        expect(within(p4).getAllByText("10")).toHaveLength(2);
+        expect(within(p4).getByText("21")).toBeInTheDocument();
+        expect(within(p4).getByText("WIN!")).toBeInTheDocument();
+
+        // Exactly 4 player panels — not 2
+        expect(screen.queryByTestId("player-5")).not.toBeInTheDocument();
+
+        expect(
+          screen.getByRole("button", { name: /play new game/i })
+        ).toBeInTheDocument();
+      };
+
+      // Verify full state BEFORE visiting settings
+      assertState();
+
+      // Visit settings, decrease to 2 players, then cancel
+      fireEvent.click(screen.getByRole("button", { name: /settings/i }));
+      await waitFor(() =>
+        fireEvent.change(
+          screen.getByRole("combobox", { name: /number of players/i }),
+          { target: { value: "2" } }
+        )
+      );
+      fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
+
+      // Full 4-player state must be identical AFTER cancelling
+      assertState();
+    });
+
+    // ─── scenario 8: 2-player game, increase to 4 in settings, cancel ───────
+
+    test("2-player blackjack win is identical before and after settings where number of players was increased to 4", async () => {
+      jest.useFakeTimers();
+
+      (useSimpleJackGame as jest.Mock).mockImplementation(() => {
+        const { useSimpleJackGame: testHook } = jest.requireActual(
+          "@/hooks/use-simple-jack"
+        );
+        return {
+          ...testHook({
+            deck: generateMockDeck({
+              "1": ["Spades-Ace", "Spades-King"],
+              "2": ["Clubs-10", "Hearts-7"],
+            }),
+          }),
+        };
+      });
+
+      render(<Home />);
+      await startSetup("2");
+      await runTimers(6);
+
+      await waitFor(() =>
+        expect(screen.getByText("WIN!")).toBeInTheDocument()
+      );
+
+      const assertState = () => {
+        const p1 = screen.getByTestId("player-1");
+        const p2 = screen.getByTestId("player-2");
+
+        expect(within(p1).getByText("TestUser")).toBeInTheDocument();
+        expect(within(p1).getAllByText("Ace")).toHaveLength(2);
+        expect(within(p1).getAllByText("King")).toHaveLength(2);
+        expect(within(p1).getByText("21")).toBeInTheDocument();
+        expect(within(p1).getByText("WIN!")).toBeInTheDocument();
+
+        expect(within(p2).getByText("Dealer")).toBeInTheDocument();
+        // P2 received only Clubs-10; Hearts-7 was never dealt.
+        // "10" appears 3 times: score(10) + card corners(2).
+        expect(within(p2).getAllByText("10")).toHaveLength(3);
+        expect(within(p2).queryByText("7")).not.toBeInTheDocument();
+
+        // Exactly 2 player panels — not 4
+        expect(screen.queryByTestId("player-3")).not.toBeInTheDocument();
+        expect(screen.queryByTestId("player-4")).not.toBeInTheDocument();
+
+        expect(
+          screen.getByRole("button", { name: /play new game/i })
+        ).toBeInTheDocument();
+      };
+
+      // Verify full state BEFORE visiting settings
+      assertState();
+
+      // Visit settings, increase to 4 players, then cancel
+      fireEvent.click(screen.getByRole("button", { name: /settings/i }));
+      await waitFor(() =>
+        fireEvent.change(
+          screen.getByRole("combobox", { name: /number of players/i }),
+          { target: { value: "4" } }
+        )
+      );
+      fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
+
+      // Full 2-player state must be identical AFTER cancelling
+      assertState();
+    });
+
     // ─── scenario 6: 2-player game, user busts, dealer wins ─────────────────
 
     test("2-player game where user busts and dealer wins is identical before and after visiting settings without making changes", async () => {
