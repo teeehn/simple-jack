@@ -1297,6 +1297,146 @@ describe("Simple Jack Game UI", () => {
       // Full state must be identical AFTER returning from settings
       assertState();
     });
+
+    // ─── scenario 9: decrease players 4→2, click Start Game ─────────────────
+    //
+    // When the player count changes, useEffect([players]) resets playerHands
+    // to empty but does NOT clear gameOver. The game loop then refuses to
+    // deal because it sees gameOver=true, leaving two blank panels on screen
+    // with "Play New Game" already visible. This test catches that regression.
+
+    test("decreasing number of players from 4 to 2 and clicking Start Game does not leave the game frozen on the old game-over state", async () => {
+      jest.useFakeTimers();
+
+      (useSimpleJackGame as jest.Mock).mockImplementation(() => {
+        const { useSimpleJackGame: testHook } = jest.requireActual(
+          "@/hooks/use-simple-jack"
+        );
+        // P4 (Dealer) hits blackjack in round 2 — no user decision needed.
+        return {
+          ...testHook({
+            deck: generateMockDeck({
+              "1": ["Spades-King", "Hearts-9"],
+              "2": ["Clubs-8", "Diamonds-Jack"],
+              "3": ["Hearts-7", "Clubs-Queen"],
+              "4": ["Diamonds-Ace", "Spades-10"],
+            }),
+          }),
+        };
+      });
+
+      render(<Home />);
+      await startSetup("4");
+      await runTimers(15);
+
+      await waitFor(() =>
+        expect(screen.getByText("WIN!")).toBeInTheDocument()
+      );
+
+      // Open settings
+      fireEvent.click(screen.getByRole("button", { name: /settings/i }));
+
+      // Set name and new (lower) player count.
+      // fireEvent.change is used for the name so the test is robust whether
+      // the form is blank (current code) or pre-populated (after fix-settings).
+      await waitFor(() =>
+        fireEvent.change(screen.getByLabelText(/your name/i), {
+          target: { value: "TestUser" },
+        })
+      );
+      await waitFor(() =>
+        fireEvent.change(
+          screen.getByRole("combobox", { name: /number of players/i }),
+          { target: { value: "2" } }
+        )
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: /start game/i }));
+
+      // If gameOver is not cleared, "Play New Game" appears immediately.
+      expect(
+        screen.queryByRole("button", { name: /play new game/i })
+      ).not.toBeInTheDocument();
+
+      // After timers only 2 player panels should be present.
+      await runTimers(15);
+
+      await waitFor(() =>
+        expect(screen.getByTestId("player-1")).toBeInTheDocument()
+      );
+      await waitFor(() =>
+        expect(screen.getByTestId("player-2")).toBeInTheDocument()
+      );
+      expect(screen.queryByTestId("player-3")).not.toBeInTheDocument();
+      expect(screen.queryByTestId("player-4")).not.toBeInTheDocument();
+    });
+
+    // ─── scenario 10: increase players 2→4, click Start Game ────────────────
+
+    test("increasing number of players from 2 to 4 and clicking Start Game does not leave the game frozen on the old game-over state", async () => {
+      jest.useFakeTimers();
+
+      (useSimpleJackGame as jest.Mock).mockImplementation(() => {
+        const { useSimpleJackGame: testHook } = jest.requireActual(
+          "@/hooks/use-simple-jack"
+        );
+        // P1 blackjacks; P2 receives one card before the game ends.
+        return {
+          ...testHook({
+            deck: generateMockDeck({
+              "1": ["Spades-Ace", "Spades-King"],
+              "2": ["Clubs-10"],
+            }),
+          }),
+        };
+      });
+
+      render(<Home />);
+      await startSetup("2");
+      await runTimers(10);
+
+      await waitFor(() =>
+        expect(screen.getByText("WIN!")).toBeInTheDocument()
+      );
+
+      // Open settings
+      fireEvent.click(screen.getByRole("button", { name: /settings/i }));
+
+      await waitFor(() =>
+        fireEvent.change(screen.getByLabelText(/your name/i), {
+          target: { value: "TestUser" },
+        })
+      );
+      await waitFor(() =>
+        fireEvent.change(
+          screen.getByRole("combobox", { name: /number of players/i }),
+          { target: { value: "4" } }
+        )
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: /start game/i }));
+
+      // If gameOver is not cleared, "Play New Game" appears immediately.
+      expect(
+        screen.queryByRole("button", { name: /play new game/i })
+      ).not.toBeInTheDocument();
+
+      // After timers all 4 panels should be present.
+      await runTimers(15);
+
+      await waitFor(() =>
+        expect(screen.getByTestId("player-1")).toBeInTheDocument()
+      );
+      await waitFor(() =>
+        expect(screen.getByTestId("player-2")).toBeInTheDocument()
+      );
+      await waitFor(() =>
+        expect(screen.getByTestId("player-3")).toBeInTheDocument()
+      );
+      await waitFor(() =>
+        expect(screen.getByTestId("player-4")).toBeInTheDocument()
+      );
+    });
   });
 
   describe("Push scenarios", () => {
