@@ -7,32 +7,49 @@ import { GameSetup } from "@/components/game-setup";
 import { GameControls } from "@/components/game-controls";
 import { EDealingSpeed } from "@/shared/types";
 
+interface GameSettings {
+  playerName: string;
+  numPlayers: number;
+  dealingSpeed: EDealingSpeed;
+}
+
 export default function Home() {
   const { gameState, newGame, setGameState, hitMe, stand } =
     useSimpleJackGame();
-  const [hasCompletedSetup, setHasCompletedSetup] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
+  const [isViewingSettings, setIsViewingSettings] = useState(false);
+  const [savedSettings, setSavedSettings] = useState<GameSettings | null>(null);
 
-  const startGame = (config: {
-    playerName: string;
-    numPlayers: number;
-    dealingSpeed: EDealingSpeed;
-  }) => {
+  const startGame = (config: GameSettings) => {
     setGameState({
       ...gameState,
       dealingSpeed: config.dealingSpeed,
       players: config.numPlayers,
       playerName: config.playerName,
     });
-    setHasCompletedSetup(true);
+    setSavedSettings(config);
+    setHasStarted(true);
+    setIsViewingSettings(false);
   };
 
   const changeSettings = () => {
-    setHasCompletedSetup(false);
+    setIsViewingSettings(true);
   };
 
-  // Show setup screen only if user hasn't completed initial setup
-  if (!hasCompletedSetup || !gameState.players) {
-    return <GameSetup onStartGame={startGame} />;
+  const cancelSettings = () => {
+    setIsViewingSettings(false);
+  };
+
+  if (!hasStarted || isViewingSettings) {
+    return (
+      <GameSetup
+        onStartGame={startGame}
+        onCancel={hasStarted ? cancelSettings : undefined}
+        initialPlayerName={savedSettings?.playerName}
+        initialNumPlayers={savedSettings?.numPlayers}
+        initialDealingSpeed={savedSettings?.dealingSpeed}
+      />
+    );
   }
 
   const getPlayerDisplayName = (playerId: number) => {
