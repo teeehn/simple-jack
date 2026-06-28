@@ -636,7 +636,7 @@ describe("Simple Jack Game UI", () => {
         ).toBeInTheDocument()
       );
 
-      userEvent.click(screen.getByRole("button", { name: /settings/i }));
+      await userEvent.click(screen.getByRole("button", { name: /settings/i }));
 
       expect(
         screen.getByRole("button", { name: /cancel/i })
@@ -695,8 +695,8 @@ describe("Simple Jack Game UI", () => {
       assertState();
 
       // Visit settings, change nothing, cancel
-      userEvent.click(screen.getByRole("button", { name: /settings/i }));
-      userEvent.click(screen.getByRole("button", { name: /cancel/i }));
+      await userEvent.click(screen.getByRole("button", { name: /settings/i }));
+      await userEvent.click(screen.getByRole("button", { name: /cancel/i }));
 
       // Full state must be identical AFTER returning from settings
       assertState();
@@ -764,14 +764,14 @@ describe("Simple Jack Game UI", () => {
       assertState();
 
       // Visit settings, change number of players to 4, then cancel
-      userEvent.click(screen.getByRole("button", { name: /settings/i }));
+      await userEvent.click(screen.getByRole("button", { name: /settings/i }));
       await waitFor(() =>
         fireEvent.change(
           screen.getByRole("combobox", { name: /number of players/i }),
           { target: { value: "4" } }
         )
       );
-      userEvent.click(screen.getByRole("button", { name: /cancel/i }));
+      await userEvent.click(screen.getByRole("button", { name: /cancel/i }));
 
       // Full 3-player game state must be identical AFTER cancelling
       assertState();
@@ -838,14 +838,14 @@ describe("Simple Jack Game UI", () => {
       assertState();
 
       // Visit settings, change dealing speed to slow, then cancel
-      userEvent.click(screen.getByRole("button", { name: /settings/i }));
+      await userEvent.click(screen.getByRole("button", { name: /settings/i }));
       await waitFor(() =>
         fireEvent.change(
           screen.getByRole("combobox", { name: /dealing speed/i }),
           { target: { value: "3000" } }
         )
       );
-      userEvent.click(screen.getByRole("button", { name: /cancel/i }));
+      await userEvent.click(screen.getByRole("button", { name: /cancel/i }));
 
       // Full push state must be identical AFTER cancelling
       assertState();
@@ -924,13 +924,13 @@ describe("Simple Jack Game UI", () => {
       assertState();
 
       // Visit settings, edit the player name, then cancel
-      userEvent.click(screen.getByRole("button", { name: /settings/i }));
+      await userEvent.click(screen.getByRole("button", { name: /settings/i }));
       await waitFor(() =>
         fireEvent.change(screen.getByLabelText(/your name/i), {
           target: { value: "NewName" },
         })
       );
-      userEvent.click(screen.getByRole("button", { name: /cancel/i }));
+      await userEvent.click(screen.getByRole("button", { name: /cancel/i }));
 
       // Full all-bust state must be identical AFTER cancelling
       assertState();
@@ -1026,14 +1026,14 @@ describe("Simple Jack Game UI", () => {
       assertState();
 
       // Visit settings and change number of players from 6 down to 2, then cancel
-      userEvent.click(screen.getByRole("button", { name: /settings/i }));
+      await userEvent.click(screen.getByRole("button", { name: /settings/i }));
       await waitFor(() =>
         fireEvent.change(
           screen.getByRole("combobox", { name: /number of players/i }),
           { target: { value: "2" } }
         )
       );
-      userEvent.click(screen.getByRole("button", { name: /cancel/i }));
+      await userEvent.click(screen.getByRole("button", { name: /cancel/i }));
 
       // Full 6-player state must be identical AFTER cancelling
       assertState();
@@ -1102,8 +1102,8 @@ describe("Simple Jack Game UI", () => {
       assertState();
 
       // Visit settings without changing anything, then cancel
-      userEvent.click(screen.getByRole("button", { name: /settings/i }));
-      userEvent.click(screen.getByRole("button", { name: /cancel/i }));
+      await userEvent.click(screen.getByRole("button", { name: /settings/i }));
+      await userEvent.click(screen.getByRole("button", { name: /cancel/i }));
 
       // Full state must be identical AFTER returning from settings
       assertState();
