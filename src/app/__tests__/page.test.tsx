@@ -20,6 +20,38 @@ jest.mock("@/hooks/use-simple-jack", () => ({
 
 import Home from "../page";
 
+/*
+ * user-event v14 + jest.useFakeTimers() compatibility note
+ *
+ * user-event v14 returns Promises from all interaction methods (click, type,
+ * etc.) and uses internal timers to sequence pointer/keyboard events. When
+ * jest.useFakeTimers() is active those internal timers are faked, so
+ * `await userEvent.click/type(...)` will hang indefinitely — the Promise
+ * never resolves.
+ *
+ * The workarounds used throughout this file are intentional:
+ *
+ *   • `await waitFor(() => userEvent.type(input, text))`
+ *     waitFor runs the callback once, userEvent fires its events synchronously
+ *     before returning the Promise, and waitFor resolves without awaiting it.
+ *
+ *   • `userEvent.click(button)` (no await) followed by runTimers / act(...)
+ *     The click handler fires synchronously; the subsequent act/runTimers call
+ *     flushes the resulting React state update.
+ *
+ *   • `await userEvent.click(button)` IS safe for settings/cancel buttons
+ *     because those clicks are not inside a fake-timer context (they happen
+ *     after the game has completed and the test is in a stable state where
+ *     user-event's internal scheduling resolves via microtasks alone).
+ *
+ * The proper long-term fix would be to configure user-event with
+ * `userEvent.setup({ advanceTimers: jest.advanceTimersByTime })` in each
+ * test/beforeEach and use the returned instance. That is a larger refactor
+ * and is deferred. Do not "clean up" the patterns above without it.
+ *
+ * Reference: https://testing-library.com/docs/user-event/options/#advancetimers
+ */
+
 describe("Simple Jack Game UI", () => {
   beforeEach(() => {
     jest.useFakeTimers();
