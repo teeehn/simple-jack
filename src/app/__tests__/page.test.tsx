@@ -20,6 +20,38 @@ jest.mock("@/hooks/use-simple-jack", () => ({
 
 import Home from "../page";
 
+/*
+ * user-event v14 + jest.useFakeTimers() compatibility note
+ *
+ * user-event v14 returns Promises from all interaction methods (click, type,
+ * etc.) and uses internal timers to sequence pointer/keyboard events. When
+ * jest.useFakeTimers() is active those internal timers are faked, so
+ * `await userEvent.click/type(...)` will hang indefinitely — the Promise
+ * never resolves.
+ *
+ * The workarounds used throughout this file are intentional:
+ *
+ *   • `await waitFor(() => userEvent.type(input, text))`
+ *     waitFor runs the callback once, userEvent fires its events synchronously
+ *     before returning the Promise, and waitFor resolves without awaiting it.
+ *
+ *   • `userEvent.click(button)` (no await) followed by runTimers / act(...)
+ *     The click handler fires synchronously; the subsequent act/runTimers call
+ *     flushes the resulting React state update.
+ *
+ *   • `await userEvent.click(button)` IS safe for settings/cancel buttons
+ *     because those clicks are not inside a fake-timer context (they happen
+ *     after the game has completed and the test is in a stable state where
+ *     user-event's internal scheduling resolves via microtasks alone).
+ *
+ * The proper long-term fix would be to configure user-event with
+ * `userEvent.setup({ advanceTimers: jest.advanceTimersByTime })` in each
+ * test/beforeEach and use the returned instance. That is a larger refactor
+ * and is deferred. Do not "clean up" the patterns above without it.
+ *
+ * Reference: https://testing-library.com/docs/user-event/options/#advancetimers
+ */
+
 describe("Simple Jack Game UI", () => {
   beforeEach(() => {
     jest.useFakeTimers();
@@ -636,7 +668,7 @@ describe("Simple Jack Game UI", () => {
         ).toBeInTheDocument()
       );
 
-      userEvent.click(screen.getByRole("button", { name: /settings/i }));
+      await userEvent.click(screen.getByRole("button", { name: /settings/i }));
 
       expect(
         screen.getByRole("button", { name: /cancel/i })
@@ -695,8 +727,8 @@ describe("Simple Jack Game UI", () => {
       assertState();
 
       // Visit settings, change nothing, cancel
-      userEvent.click(screen.getByRole("button", { name: /settings/i }));
-      userEvent.click(screen.getByRole("button", { name: /cancel/i }));
+      await userEvent.click(screen.getByRole("button", { name: /settings/i }));
+      await userEvent.click(screen.getByRole("button", { name: /cancel/i }));
 
       // Full state must be identical AFTER returning from settings
       assertState();
@@ -764,14 +796,14 @@ describe("Simple Jack Game UI", () => {
       assertState();
 
       // Visit settings, change number of players to 4, then cancel
-      userEvent.click(screen.getByRole("button", { name: /settings/i }));
+      await userEvent.click(screen.getByRole("button", { name: /settings/i }));
       await waitFor(() =>
         fireEvent.change(
           screen.getByRole("combobox", { name: /number of players/i }),
           { target: { value: "4" } }
         )
       );
-      userEvent.click(screen.getByRole("button", { name: /cancel/i }));
+      await userEvent.click(screen.getByRole("button", { name: /cancel/i }));
 
       // Full 3-player game state must be identical AFTER cancelling
       assertState();
@@ -838,14 +870,14 @@ describe("Simple Jack Game UI", () => {
       assertState();
 
       // Visit settings, change dealing speed to slow, then cancel
-      userEvent.click(screen.getByRole("button", { name: /settings/i }));
+      await userEvent.click(screen.getByRole("button", { name: /settings/i }));
       await waitFor(() =>
         fireEvent.change(
           screen.getByRole("combobox", { name: /dealing speed/i }),
           { target: { value: "3000" } }
         )
       );
-      userEvent.click(screen.getByRole("button", { name: /cancel/i }));
+      await userEvent.click(screen.getByRole("button", { name: /cancel/i }));
 
       // Full push state must be identical AFTER cancelling
       assertState();
@@ -924,13 +956,13 @@ describe("Simple Jack Game UI", () => {
       assertState();
 
       // Visit settings, edit the player name, then cancel
-      userEvent.click(screen.getByRole("button", { name: /settings/i }));
+      await userEvent.click(screen.getByRole("button", { name: /settings/i }));
       await waitFor(() =>
         fireEvent.change(screen.getByLabelText(/your name/i), {
           target: { value: "NewName" },
         })
       );
-      userEvent.click(screen.getByRole("button", { name: /cancel/i }));
+      await userEvent.click(screen.getByRole("button", { name: /cancel/i }));
 
       // Full all-bust state must be identical AFTER cancelling
       assertState();
@@ -1026,14 +1058,14 @@ describe("Simple Jack Game UI", () => {
       assertState();
 
       // Visit settings and change number of players from 6 down to 2, then cancel
-      userEvent.click(screen.getByRole("button", { name: /settings/i }));
+      await userEvent.click(screen.getByRole("button", { name: /settings/i }));
       await waitFor(() =>
         fireEvent.change(
           screen.getByRole("combobox", { name: /number of players/i }),
           { target: { value: "2" } }
         )
       );
-      userEvent.click(screen.getByRole("button", { name: /cancel/i }));
+      await userEvent.click(screen.getByRole("button", { name: /cancel/i }));
 
       // Full 6-player state must be identical AFTER cancelling
       assertState();
@@ -1102,8 +1134,8 @@ describe("Simple Jack Game UI", () => {
       assertState();
 
       // Visit settings without changing anything, then cancel
-      userEvent.click(screen.getByRole("button", { name: /settings/i }));
-      userEvent.click(screen.getByRole("button", { name: /cancel/i }));
+      await userEvent.click(screen.getByRole("button", { name: /settings/i }));
+      await userEvent.click(screen.getByRole("button", { name: /cancel/i }));
 
       // Full state must be identical AFTER returning from settings
       assertState();
