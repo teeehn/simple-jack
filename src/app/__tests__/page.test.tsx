@@ -40,8 +40,10 @@ import Home from "../page";
  *     flushes the resulting React state update.
  *
  *   • `fireEvent.click(button)` is used for settings/cancel buttons even
- *     though they appear after game completion — `await userEvent.click`
- *     still hangs because fake timers are still active at that point.
+ *     though they appear after game completion. `await userEvent.click`
+ *     still hangs because fake timers are still active and userEvent relies
+ *     on internal timer scheduling. fireEvent is synchronous and doesn't
+ *     depend on those timers, so it works reliably.
  *
  * The proper long-term fix would be to configure user-event with
  * `userEvent.setup({ advanceTimers: jest.advanceTimersByTime })` in each
