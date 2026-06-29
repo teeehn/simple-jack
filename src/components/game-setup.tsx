@@ -7,13 +7,23 @@ interface GameSetupProps {
     numPlayers: number;
     dealingSpeed: EDealingSpeed;
   }) => void;
+  onCancel?: () => void;
+  initialPlayerName?: string;
+  initialNumPlayers?: number;
+  initialDealingSpeed?: EDealingSpeed;
 }
 
-export function GameSetup({ onStartGame }: GameSetupProps) {
-  const [numPlayers, setNumPlayers] = useState<number | undefined>();
-  const [playerName, setPlayerName] = useState<string>("");
+export function GameSetup({
+  onStartGame,
+  onCancel,
+  initialPlayerName,
+  initialNumPlayers,
+  initialDealingSpeed,
+}: GameSetupProps) {
+  const [numPlayers, setNumPlayers] = useState<number | undefined>(initialNumPlayers);
+  const [playerName, setPlayerName] = useState<string>(initialPlayerName ?? "");
   const [dealingSpeed, setDealingSpeed] = useState<EDealingSpeed>(
-    EDealingSpeed.normal
+    initialDealingSpeed ?? EDealingSpeed.normal
   );
 
   const handleStartGame = () => {
@@ -134,6 +144,18 @@ export function GameSetup({ onStartGame }: GameSetupProps) {
               </span>
             )}
           </button>
+
+          {onCancel && (
+            <button
+              onClick={onCancel}
+              className="w-full py-4 px-6 rounded-xl font-bold text-lg transition-all duration-300 shadow-lg hover:shadow-xl transform bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white hover:scale-105 active:scale-95"
+            >
+              <span className="flex items-center justify-center space-x-2">
+                <span>✖️</span>
+                <span>Cancel</span>
+              </span>
+            </button>
+          )}
         </div>
 
         <div className="mt-8 text-center">

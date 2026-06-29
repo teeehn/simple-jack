@@ -7,32 +7,69 @@ import { GameSetup } from "@/components/game-setup";
 import { GameControls } from "@/components/game-controls";
 import { EDealingSpeed } from "@/shared/types";
 
+interface GameSettings {
+  playerName: string;
+  numPlayers: number;
+  dealingSpeed: EDealingSpeed;
+}
+
 export default function Home() {
   const { gameState, newGame, setGameState, hitMe, stand } =
     useSimpleJackGame();
-  const [hasCompletedSetup, setHasCompletedSetup] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
+  const [isViewingSettings, setIsViewingSettings] = useState(false);
+  const [savedSettings, setSavedSettings] = useState<GameSettings | null>(null);
 
-  const startGame = (config: {
-    playerName: string;
-    numPlayers: number;
-    dealingSpeed: EDealingSpeed;
-  }) => {
-    setGameState({
-      ...gameState,
-      dealingSpeed: config.dealingSpeed,
-      players: config.numPlayers,
-      playerName: config.playerName,
-    });
-    setHasCompletedSetup(true);
+  const startGame = (config: GameSettings) => {
+    if (gameState.gameOver && config.numPlayers !== gameState.players) {
+      // When the player count changes on a completed game, useEffect([players])
+      // resets playerHands but leaves gameOver=true, freezing the game loop.
+      // Reset game-over state so the loop restarts with the new count.
+      setGameState({
+        ...gameState,
+        dealingSpeed: config.dealingSpeed,
+        players: config.numPlayers,
+        playerName: config.playerName,
+        cardsDealtOnTurn: 0,
+        commentary: [],
+        currentPlayerIdx: 0,
+        gameOver: false,
+        gameSummary: undefined,
+        highScore: 0,
+        pushMessage: undefined,
+        winner: undefined,
+      });
+    } else {
+      setGameState({
+        ...gameState,
+        dealingSpeed: config.dealingSpeed,
+        players: config.numPlayers,
+        playerName: config.playerName,
+      });
+    }
+    setSavedSettings(config);
+    setHasStarted(true);
+    setIsViewingSettings(false);
   };
 
   const changeSettings = () => {
-    setHasCompletedSetup(false);
+    setIsViewingSettings(true);
   };
 
-  // Show setup screen only if user hasn't completed initial setup
-  if (!hasCompletedSetup || !gameState.players) {
-    return <GameSetup onStartGame={startGame} />;
+  const cancelSettings = () => {
+    setIsViewingSettings(false);
+  };
+
+  if (!hasStarted || isViewingSettings) {
+    return (
+      <GameSetup
+        onStartGame={startGame}
+        onCancel={hasStarted ? cancelSettings : undefined}
+        initialPlayerName={savedSettings?.playerName}
+        initialNumPlayers={savedSettings?.numPlayers}
+        initialDealingSpeed={savedSettings?.dealingSpeed}
+      />
+    );
   }
 
   const getPlayerDisplayName = (playerId: number) => {
