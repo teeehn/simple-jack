@@ -246,9 +246,15 @@ describe("useSimpleJackGame Hook", () => {
         act(() => jest.runAllTimers());
       }
 
-      const { hitMe } = result.current;
+      await waitFor(() => result.current.hitMe());
 
-      await waitFor(() => hitMe());
+      for (let i = 0; i < 4; i += 1) {
+        act(() => jest.runAllTimers());
+      }
+
+      // With sequential dealing, the user keeps the turn after a non-busting hit;
+      // they must stand before the dealer draws.
+      await waitFor(() => result.current.stand());
 
       for (let i = 0; i < 4; i += 1) {
         act(() => jest.runAllTimers());

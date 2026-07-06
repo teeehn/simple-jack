@@ -137,6 +137,13 @@ export function useSimpleJackGame(props?: IGameProps) {
     const playerCard: Card = validator(gameDeck.shift()!);
     const updatedPlayerHands = [...playerHands];
 
+    // Check before mutating: once every player has their initial 2 cards,
+    // switch to sequential turn-taking (current player keeps the turn until
+    // they stand, bust, or hit 21).
+    const wasInitialDealComplete = updatedPlayerHands.every(
+      (hand) => hand.cards.length >= 2
+    );
+
     updatedPlayerHands[i].cards.push(playerCard);
     updatedPlayerHands[i].score = getHandScore(updatedPlayerHands[i].cards);
 
@@ -174,14 +181,15 @@ export function useSimpleJackGame(props?: IGameProps) {
         gameState.dealingSpeed || EDealingSpeed.normal
       );
     } else if (updatedPlayerHands[i].score < SIMPLE_JACK_SCORE) {
+      const nextIdx = wasInitialDealComplete ? i : nextPlayerIdx;
       setTimeout(
         () =>
           setGameState({
             ...gameState,
             cardsDealtOnTurn:
-              nextPlayerIdx === 0 ? 0 : gameState.cardsDealtOnTurn + 1,
+              nextIdx === 0 ? 0 : gameState.cardsDealtOnTurn + 1,
             commentary: updatedCommentary,
-            currentPlayerIdx: nextPlayerIdx,
+            currentPlayerIdx: nextIdx,
             highScore:
               updatedPlayerHands[i].score > gameState.highScore
                 ? updatedPlayerHands[i].score
