@@ -18,7 +18,7 @@ jest.mock("@/hooks/use-simple-jack", () => ({
   useSimpleJackGame: jest.fn(),
 }));
 
-import Home from "../page";
+import Home from "../app/page";
 
 /*
  * user-event v14 + jest.useFakeTimers() compatibility note
