@@ -1,4 +1,4 @@
-import { getHandScore } from "./get-hand-score";
+import { getHandScore } from "../lib/utils/get-hand-score";
 
 describe("gethandScore", () => {
   test("Adds hands correctly which do not contain aces.", () => {
