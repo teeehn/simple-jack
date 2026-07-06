@@ -1,6 +1,6 @@
 "use strict";
 
-import { generateMockDeck as generateDeck, getCardParts } from "@/lib/utils";
+import { getCardParts } from "@/lib/utils";
 
 import { Card, CardValue, PlayerHand, Suit } from "@/shared/types";
 
@@ -9,7 +9,6 @@ import {
   DECK_SIZE,
   MAX_PLAYERS,
   MIN_PLAYERS,
-  MUST_STAND_SCORE,
   SIMPLE_JACK_SCORE,
 } from "@/shared/constants";
 
@@ -140,100 +139,3 @@ export function playerCardHand(id: number): PlayerHand {
   };
 }
 
-export function simpleJack(props: {
-  deck?: Card[] | null;
-  players: number;
-}): string | null {
-  const { players } = props;
-
-  // Generate a new shuffled deck if it is not supplied.
-
-  const deck =
-    !props?.deck || (Array.isArray(props?.deck) && props.deck.length === 0)
-      ? generateDeck()
-      : props.deck;
-
-  // Validate that the number of players is correct.
-
-  validatePlayers(players);
-
-  // Validate the deck.
-
-  validateDeck(deck!);
-
-  // Initialize.
-  let winner: number | undefined;
-  let gameOver = false;
-  let highScore = 0;
-
-  // Store the players' hands.
-
-  const playerHands: PlayerHand[] = new Array(players);
-
-  // Keep dealing until the game is over.
-
-  const validator = validateCard();
-
-  while (!gameOver) {
-    // Initialize cards dealt on turn.
-    let cardsDealtOnTurn = 0;
-
-    // Deal cards to each player if required.
-    for (let i = 0; i < players; i += 1) {
-      // Initialize player hand object on first turn.
-      if (!playerHands[i]) {
-        playerHands[i] = playerCardHand(i + 1);
-      }
-
-      if (playerHands[i]?.score < MUST_STAND_SCORE) {
-        // Deal a card
-        //  and check if the card is valid.
-
-        // Check for an exhausted deck.
-        if (deck!.length <= 0) {
-          gameOver = true;
-          break;
-        }
-
-        const playerCard = validator(deck!.shift()!);
-
-        // Increment cards dealt on turn.
-        cardsDealtOnTurn += 1;
-
-        playerHands[i].score += getCardValue(playerCard, playerHands[i].score);
-
-        playerHands[i].cards.push(playerCard);
-
-        if (playerHands[i].score === SIMPLE_JACK_SCORE) {
-          winner = playerHands[i].playerId;
-          gameOver = true;
-          highScore = SIMPLE_JACK_SCORE;
-          break;
-        } else if (playerHands[i].score < SIMPLE_JACK_SCORE) {
-          highScore =
-            playerHands[i].score > highScore ? playerHands[i].score : highScore;
-        }
-      }
-    }
-
-    if (cardsDealtOnTurn === 0) {
-      // Exits outer loop.
-      gameOver = true;
-    }
-  }
-
-  if (!winner) {
-    const highScores = playerHands.filter((hand) => hand.score === highScore);
-    if (highScores.length === 1) {
-      winner = highScores[0].playerId;
-    } else {
-      return null;
-    }
-  }
-
-  return winner
-    ? `Winner: ${winner}, Hand: ${playerHands[
-        winner - 1
-      ].cardsToString()}, Value: ${highScore}`
-    : null;
-}
