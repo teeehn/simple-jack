@@ -10,7 +10,7 @@ import {
 import { MUST_STAND_SCORE, SIMPLE_JACK_SCORE } from "@/shared/constants";
 import {
   playerCardHand,
-  validateCard,
+  createDealValidator,
   validateDeck,
   validatePlayers,
 } from "@/lib/simple-jack";
@@ -133,7 +133,7 @@ export function useSimpleJackGame(props?: IGameProps) {
 
     // Initialize the card deal validator.
 
-    const validator = validateCard();
+    const validator = createDealValidator();
     const playerCard: Card = validator(gameDeck.shift()!);
     const updatedPlayerHands = [...playerHands];
 

@@ -13,22 +13,29 @@ import {
 } from "@/shared/constants";
 
 /**
- * isCardValid - Validates a card based on validation data.
- *  Returns true if the card is valid.
- *  Throws an error if not valid.
+ * isCardValid - Returns true if the card is valid, false otherwise.
  *
  * @param testCard {Card}
  * @returns boolean
  */
 export function isCardValid(testCard: Card): boolean {
+  if (!testCard) return false;
   const { suit, value } = getCardParts(testCard);
-  if (
-    !validationData.suits[suit as Suit] ||
-    !validationData.values[value as CardValue]
-  ) {
+  return (
+    !!validationData.suits[suit as Suit] &&
+    !!validationData.values[value as CardValue]
+  );
+}
+
+/**
+ * assertCardValid - Throws an error if the card is not valid.
+ *
+ * @param testCard {Card}
+ */
+export function assertCardValid(testCard: Card): void {
+  if (!isCardValid(testCard)) {
     throw new Error("Card is not valid.");
   }
-  return true;
 }
 
 /**
@@ -46,9 +53,7 @@ export function validateDeck(deck: Card[]): void {
   if (new Set(deck).size !== DECK_SIZE) {
     throw new Error(`The deck must have ${DECK_SIZE} unique cards.`);
   }
-  if (!deck.every((card) => isCardValid(card))) {
-    throw new Error("All cards in deck must be valid.");
-  }
+  deck.forEach((card) => assertCardValid(card));
 }
 
 /**
@@ -100,22 +105,17 @@ export function getCardValue(card: Card, currentScore?: number): number {
 }
 
 /**
- * validateCard
- *
- * Returns a function which validates a card and saves
- *  the card to the cardsDealt property.
- *  If the card is invalid it throws an error.
+ * createDealValidator - Returns a function that validates a card and tracks
+ *  it in the cards dealt for the current game. Throws if the card is invalid.
  *
  * @returns {function}
  */
-export function validateCard(): (testCard: Card) => Card {
+export function createDealValidator(): (testCard: Card) => Card {
   const cardsDealt: Card[] = [];
   return function (testCard: Card): Card {
-    if (isCardValid(testCard)) {
-      cardsDealt.push(testCard);
-      return testCard;
-    }
-    throw new Error("Invalid card dealt");
+    assertCardValid(testCard);
+    cardsDealt.push(testCard);
+    return testCard;
   };
 }
 
@@ -138,4 +138,3 @@ export function playerCardHand(id: number): PlayerHand {
     score: 0,
   };
 }
-

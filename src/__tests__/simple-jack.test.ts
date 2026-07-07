@@ -1,6 +1,7 @@
 import { Card } from "@/shared/types";
 import {
   isCardValid,
+  assertCardValid,
   validateDeck,
   validatePlayers,
   getCardValue,
@@ -15,12 +16,35 @@ describe("isCardValid", () => {
     expect(isCardValid("Diamonds-2")).toBe(true);
   });
 
+  test("returns false for an invalid suit", () => {
+    expect(isCardValid("Cubs-Ace" as Card)).toBe(false);
+  });
+
+  test("returns false for an invalid value", () => {
+    expect(isCardValid("Spades-15" as Card)).toBe(false);
+  });
+
+  test("returns false for null or undefined", () => {
+    expect(isCardValid(null as unknown as Card)).toBe(false);
+    expect(isCardValid(undefined as unknown as Card)).toBe(false);
+  });
+});
+
+describe("assertCardValid", () => {
+  test("does not throw for a valid card", () => {
+    expect(() => assertCardValid("Spades-Ace")).not.toThrow();
+  });
+
   test("throws for an invalid suit", () => {
-    expect(() => isCardValid("Cubs-Ace" as Card)).toThrow("Card is not valid.");
+    expect(() => assertCardValid("Cubs-Ace" as Card)).toThrow(
+      "Card is not valid."
+    );
   });
 
   test("throws for an invalid value", () => {
-    expect(() => isCardValid("Spades-15" as Card)).toThrow("Card is not valid.");
+    expect(() => assertCardValid("Spades-15" as Card)).toThrow(
+      "Card is not valid."
+    );
   });
 });
 
@@ -54,7 +78,7 @@ describe("validateDeck", () => {
   test("throws when deck contains an invalid card", () => {
     const deck = generateMockDeck();
     deck[0] = "Invalid-Card" as Card;
-    expect(() => validateDeck(deck)).toThrow();
+    expect(() => validateDeck(deck)).toThrow("Card is not valid.");
   });
 });
 
