@@ -4,7 +4,7 @@ import "@testing-library/jest-dom";
 
 import { PlayerHand } from "@/shared/types";
 import { playerCardHand } from "@/lib/simple-jack";
-import { Player } from "./player";
+import { Player } from "../components/player";
 
 describe("Player", () => {
   test("Renders with default props.", () => {

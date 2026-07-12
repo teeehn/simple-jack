@@ -1,5 +1,5 @@
-import { generateMockDeck } from "./mock-deck-generator";
-import { validateDeck } from "../simple-jack";
+import { generateMockDeck } from "../lib/utils/mock-deck-generator";
+import { validateDeck } from "../lib/simple-jack";
 import { Card, CardValue, TestCase, Suit } from "@/shared/types";
 
 describe("generateMockDeck", () => {

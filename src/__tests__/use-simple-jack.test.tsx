@@ -1,7 +1,7 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 
 import { generateMockDeck } from "@/lib/utils";
-import { useSimpleJackGame } from "./use-simple-jack";
+import { useSimpleJackGame } from "../hooks/use-simple-jack";
 import { Card } from "@/shared/types";
 
 // Mock the deck validator to prevent errors on re-render.
