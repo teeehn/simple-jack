@@ -132,4 +132,10 @@ describe("getCardValue", () => {
       "Card has empty value."
     );
   });
+
+  test("throws for a non-numeric, non-face-card value", () => {
+    expect(() => getCardValue("Spades-abc" as Card)).toThrow(
+      "Card value is not valid."
+    );
+  });
 });

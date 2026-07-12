@@ -532,5 +532,39 @@ describe("useSimpleJackGame Hook", () => {
         expect(result.current.gameState.playerHands![0].cards.length).toBeGreaterThan(0)
       );
     });
+
+    test("game ends when deck is exhausted before a player can draw", async () => {
+      const deck: Card[] = generateMockDeck({
+        "1": ["Spades-2", "Hearts-3"],
+        "2": ["Clubs-4", "Diamonds-5"],
+      });
+
+      const { result } = renderHook(() =>
+        useSimpleJackGame({ deck, players: 2, playerName: "TestUser" })
+      );
+
+      // Run the initial deal: 4 cards total (2 per player)
+      for (let i = 0; i < 5; i += 1) {
+        act(() => jest.runAllTimers());
+      }
+
+      await waitFor(() =>
+        expect(result.current.gameState.playerHands![1].cards).toHaveLength(2)
+      );
+
+      // Drain the remaining deck to simulate exhaustion mid-game
+      act(() => {
+        result.current.setGameState((prev) => ({ ...prev, gameDeck: [] }));
+      });
+
+      // P1's turn: score is 5, userCanChoose=true — P1 stands
+      act(() => result.current.stand());
+      act(() => jest.runAllTimers());
+
+      // P2 tries to draw but the deck is empty → game ends
+      await waitFor(() =>
+        expect(result.current.gameState.gameOver).toBe(true)
+      );
+    });
   });
 });
