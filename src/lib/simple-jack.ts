@@ -119,8 +119,8 @@ export function createDealValidator(): (testCard: Card) => Card {
   };
 }
 
-export function playerCardHand(id: number): PlayerHand {
-  const cards: Card[] = [];
+export function playerCardHand(id: number, initialCards: Card[] = []): PlayerHand {
+  const cards: Card[] = [...initialCards];
   const cardsToString = function (): string {
     const str = `[${cards.reduce((acc, card, idx, arr) => {
       if (idx === arr.length - 1) {
