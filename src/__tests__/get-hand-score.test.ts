@@ -1,4 +1,5 @@
-import { getHandScore } from "../lib/utils/get-hand-score";
+import { getHandScore, getStaticCardValue } from "../lib/utils/get-hand-score";
+import { CardValueNotAce } from "../shared/types";
 
 describe("gethandScore", () => {
   test("Adds hands correctly which do not contain aces.", () => {
@@ -13,6 +14,13 @@ describe("gethandScore", () => {
   });
 
   test("Adds hands correctly which contain an arbitrary number of aces.", () => {
+    // 3 aces: low=3, high=13; 0+13=13 ≤ 21 → 13
+    expect(getHandScore(["Spades-Ace", "Clubs-Ace", "Hearts-Ace"])).toBe(13);
+    // 3 aces + King: 10+13=23 > 21 → 10+3=13
+    expect(
+      getHandScore(["Spades-Ace", "Clubs-Ace", "Hearts-Ace", "Diamonds-King"])
+    ).toBe(13);
+
     expect(
       getHandScore(["Spades-Ace", "Clubs-Ace", "Hearts-Ace", "Diamonds-Ace"])
     ).toBe(14);
@@ -56,5 +64,13 @@ describe("gethandScore", () => {
 
   test("Throws if hand is undefined.", () => {
     expect(() => getHandScore(undefined as never)).toThrow();
+  });
+});
+
+describe("getStaticCardValue", () => {
+  test("throws for a non-numeric, non-face-card value", () => {
+    expect(() => getStaticCardValue("abc" as CardValueNotAce)).toThrow(
+      "Card value is not valid."
+    );
   });
 });
