@@ -19,7 +19,7 @@ import {
  * @returns boolean
  */
 export function isCardValid(testCard: Card): boolean {
-  if (!testCard) return false;
+  if (!testCard) return false; // getCardParts throws on null/undefined; predicates must not throw
   const { suit, value } = getCardParts(testCard);
   return (
     !!validationData.suits[suit as Suit] &&
