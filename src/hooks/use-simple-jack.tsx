@@ -95,13 +95,15 @@ export function useSimpleJackGame(props?: IGameProps) {
   const stand = () => {
     if (gameState.currentPlayerIdx === 0 && gameState.playerHands?.[0]) {
       const playerHands = [...gameState.playerHands];
-      playerHands[0].hasStood = true;
+      const currentHand = playerHands[0];
+      const newHand = playerCardHand(currentHand.playerId!, currentHand.cards);
+      newHand.score = currentHand.score;
+      newHand.hasStood = true;
+      playerHands[0] = newHand;
 
       const commentary = [...gameState.commentary];
       commentary.unshift(
-        `${getPlayerDisplayName(1)} chooses to stand with ${
-          playerHands[0].score
-        }`
+        `${getPlayerDisplayName(1)} chooses to stand with ${newHand.score}`
       );
 
       // Force the next player transition immediately
@@ -144,8 +146,10 @@ export function useSimpleJackGame(props?: IGameProps) {
       (hand) => hand.cards.length >= 2
     );
 
-    updatedPlayerHands[i].cards.push(playerCard);
-    updatedPlayerHands[i].score = getHandScore(updatedPlayerHands[i].cards);
+    const currentHand = updatedPlayerHands[i];
+    const newHand = playerCardHand(currentHand.playerId!, [...currentHand.cards, playerCard]);
+    newHand.score = getHandScore(newHand.cards);
+    updatedPlayerHands[i] = newHand;
 
     const updatedCommentary = [...commentary];
     updatedCommentary.unshift(

@@ -414,13 +414,13 @@ describe("useSimpleJackGame Hook", () => {
         act(() => jest.runAllTimers());
       }
 
-      const { hitMe, stand } = result.current;
-
-      // User hits once to get 7, then stands
-      await waitFor(() => hitMe());
+      // User hits once to get 7, then stands.
+      // Use result.current.* to always get the latest closure — a captured
+      // reference would close over stale state before the hit updated the hand.
+      await waitFor(() => result.current.hitMe());
       act(() => jest.runAllTimers());
 
-      await waitFor(() => stand());
+      await waitFor(() => result.current.stand());
 
       // Let dealer play out and bust
       for (let i = 0; i < 10; i += 1) {
@@ -488,17 +488,13 @@ describe("useSimpleJackGame Hook", () => {
       expect(result.current.gameState.players).toBe(2);
       expect(result.current.gameState.playerName).toBe("TestUser");
 
-      // TODO: these assertions are skipped due to a shallow-copy mutation bug in
-      // dealCardToCurrentPlayer. The function does [...playerHands] which creates
-      // a new outer array but the hand OBJECTS inside are the same references.
-      // When it then does updatedPlayerHands[i].cards.push(card), it mutates the
-      // original hand object's cards array synchronously — before the setTimeout
-      // fires. So even though newGame() resets the hands to empty, the very next
-      // dealCardToCurrentPlayer call (triggered by useEffect) immediately mutates
-      // those same card arrays. By the time waitFor runs, the arrays are no longer
-      // empty. Fix: create a new hand object (spread) before pushing the card, and
-      // update playerCardHand's cardsToString to use `this.cards` rather than the
-      // closed-over variable so the spread copy's method still reads the right array.
+      // Player hands start fresh with no cards
+      await waitFor(() =>
+        expect(result.current.gameState.playerHands![0].cards).toHaveLength(0)
+      );
+      await waitFor(() =>
+        expect(result.current.gameState.playerHands![1].cards).toHaveLength(0)
+      );
     });
 
     test("after newGame, dealing resumes automatically", async () => {
