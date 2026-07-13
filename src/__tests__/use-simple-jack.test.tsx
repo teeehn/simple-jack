@@ -21,7 +21,7 @@ describe("useSimpleJackGame Hook", () => {
       jest.useFakeTimers();
     });
     afterEach(() => {
-      jest.runOnlyPendingTimers();
+      act(() => jest.runOnlyPendingTimers());
       jest.useRealTimers();
       jest.clearAllMocks();
     });
