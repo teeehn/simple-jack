@@ -562,5 +562,122 @@ describe("useSimpleJackGame Hook", () => {
         expect(result.current.gameState.gameOver).toBe(true)
       );
     });
+
+    test("newGame resets playerHands to undefined when no players are configured", async () => {
+      const deck = generateMockDeck();
+      const { result } = renderHook(() => useSimpleJackGame({ deck }));
+
+      expect(result.current.gameState.playerHands).toBeUndefined();
+
+      await waitFor(() => result.current.newGame());
+
+      await waitFor(() =>
+        expect(result.current.gameState.playerHands).toBeUndefined()
+      );
+      expect(result.current.gameState.gameOver).toBe(false);
+    });
+
+    test("stand() is a no-op when playerHands is not initialized", () => {
+      const deck = generateMockDeck();
+      const { result } = renderHook(() => useSimpleJackGame({ deck }));
+
+      act(() => result.current.stand());
+      act(() => jest.runAllTimers());
+
+      expect(result.current.gameState.playerHands).toBeUndefined();
+      expect(result.current.gameState.gameOver).toBe(false);
+    });
+
+    test("hitMe() is a no-op when playerHands is not initialized", () => {
+      const deck = generateMockDeck();
+      const { result } = renderHook(() => useSimpleJackGame({ deck }));
+
+      act(() => result.current.hitMe());
+      act(() => jest.runAllTimers());
+
+      expect(result.current.gameState.playerHands).toBeUndefined();
+      expect(result.current.gameState.gameOver).toBe(false);
+    });
+
+    test("hitMe() is a no-op when the deck is empty (dealCardToCurrentPlayer early return)", async () => {
+      const deck: Card[] = generateMockDeck({
+        "1": ["Spades-King", "Hearts-7"],
+        "2": ["Clubs-8", "Diamonds-Jack"],
+      });
+
+      const { result } = renderHook(() =>
+        useSimpleJackGame({ deck, players: 2, playerName: "TestUser" })
+      );
+
+      // Deal initial cards (P1: 17, P2: 18)
+      for (let i = 0; i < 4; i += 1) {
+        act(() => jest.runAllTimers());
+      }
+
+      await waitFor(() =>
+        expect(result.current.gameState.playerHands![0].cards).toHaveLength(2)
+      );
+
+      // Drain the deck
+      act(() => {
+        result.current.setGameState((prev) => ({ ...prev, gameDeck: [] }));
+      });
+
+      // hitMe() calls dealCardToCurrentPlayer which hits the early-return guard at
+      // "if (!playerHands || !gameDeck || gameDeck.length <= 0) return"
+      act(() => result.current.hitMe());
+      act(() => jest.runAllTimers());
+
+      // No card was added — hand stays at 2
+      expect(result.current.gameState.playerHands![0].cards).toHaveLength(2);
+    });
+
+    test("game loop advances past P1 when hasStood is true but currentPlayerIdx is still 0", async () => {
+      const deck: Card[] = generateMockDeck({
+        "1": ["Spades-King", "Hearts-7"],
+        "2": ["Clubs-8", "Diamonds-Jack"],
+      });
+
+      const { result } = renderHook(() =>
+        useSimpleJackGame({ deck, players: 2, playerName: "TestUser" })
+      );
+
+      // Deal initial cards (P1: 17, P2: 18)
+      for (let i = 0; i < 4; i += 1) {
+        act(() => jest.runAllTimers());
+      }
+
+      await waitFor(() =>
+        expect(result.current.gameState.playerHands![0].cards).toHaveLength(2)
+      );
+
+      // Race condition: stand()'s setTimeout may fire after the game loop ticks but
+      // before currentPlayerIdx updates. This forces the specific state where
+      // P1.hasStood=true but currentPlayerIdx is still 0, ensuring the game loop
+      // correctly advances past the stuck player (lines 291-297).
+      act(() => {
+        result.current.setGameState((prev) => ({
+          ...prev,
+          currentPlayerIdx: 0,
+          playerHands: prev.playerHands!.map((hand, idx) =>
+            idx === 0 ? { ...hand, hasStood: true } : hand
+          ),
+        }));
+      });
+
+      // Game loop advances currentPlayerIdx from 0 to 1
+      await waitFor(() =>
+        expect(result.current.gameState.currentPlayerIdx).not.toBe(0)
+      );
+
+      // P2 score (18) >= MUST_STAND_SCORE (17) with cardsDealtOnTurn=0 → game over
+      await waitFor(() =>
+        expect(result.current.gameState.gameOver).toBe(true)
+      );
+
+      await waitFor(() =>
+        expect(result.current.gameState.winner).toBe(2)
+      );
+    });
   });
 });

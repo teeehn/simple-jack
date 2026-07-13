@@ -1444,16 +1444,14 @@ describe("Simple Jack Game UI", () => {
 
       fireEvent.click(screen.getByRole("button", { name: /start game/i }));
 
+      // If gameOver is not cleared, "Play New Game" appears immediately.
       expect(
         screen.queryByRole("button", { name: /play new game/i })
       ).not.toBeInTheDocument();
 
-      await runTimers(15);
-
-      expect(
-        screen.queryByRole("button", { name: /play new game/i })
-      ).not.toBeInTheDocument();
-
+      // Player panels appear before any cards are dealt — useEffect([players])
+      // initializes empty hands synchronously, before the first deal timer fires.
+      // At this point no cards have been dealt, so the game cannot have ended.
       await waitFor(() =>
         expect(screen.getByTestId("player-1")).toBeInTheDocument()
       );
@@ -1467,6 +1465,11 @@ describe("Simple Jack Game UI", () => {
         expect(screen.getByTestId("player-4")).toBeInTheDocument()
       );
       expect(screen.queryByTestId("player-5")).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: /play new game/i })
+      ).not.toBeInTheDocument();
+
+      await runTimers(15);
     });
 
     // ─── scenario 12: P1 busts (hits), 3 players → decrease to 2, Start Game ─
@@ -1528,16 +1531,14 @@ describe("Simple Jack Game UI", () => {
 
       fireEvent.click(screen.getByRole("button", { name: /start game/i }));
 
+      // If gameOver is not cleared, "Play New Game" appears immediately.
       expect(
         screen.queryByRole("button", { name: /play new game/i })
       ).not.toBeInTheDocument();
 
-      await runTimers(15);
-
-      expect(
-        screen.queryByRole("button", { name: /play new game/i })
-      ).not.toBeInTheDocument();
-
+      // Player panels appear before any cards are dealt — useEffect([players])
+      // initializes empty hands synchronously, before the first deal timer fires.
+      // At this point no cards have been dealt, so the game cannot have ended.
       await waitFor(() =>
         expect(screen.getByTestId("player-1")).toBeInTheDocument()
       );
@@ -1545,6 +1546,11 @@ describe("Simple Jack Game UI", () => {
         expect(screen.getByTestId("player-2")).toBeInTheDocument()
       );
       expect(screen.queryByTestId("player-3")).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: /play new game/i })
+      ).not.toBeInTheDocument();
+
+      await runTimers(15);
     });
 
     // ─── scenario 13: P1 stands, 2 players → increase to 3, Start Game ───────
@@ -1609,16 +1615,14 @@ describe("Simple Jack Game UI", () => {
 
       fireEvent.click(screen.getByRole("button", { name: /start game/i }));
 
+      // If gameOver is not cleared, "Play New Game" appears immediately.
       expect(
         screen.queryByRole("button", { name: /play new game/i })
       ).not.toBeInTheDocument();
 
-      await runTimers(15);
-
-      expect(
-        screen.queryByRole("button", { name: /play new game/i })
-      ).not.toBeInTheDocument();
-
+      // Player panels appear before any cards are dealt — useEffect([players])
+      // initializes empty hands synchronously, before the first deal timer fires.
+      // At this point no cards have been dealt, so the game cannot have ended.
       await waitFor(() =>
         expect(screen.getByTestId("player-1")).toBeInTheDocument()
       );
@@ -1629,6 +1633,11 @@ describe("Simple Jack Game UI", () => {
         expect(screen.getByTestId("player-3")).toBeInTheDocument()
       );
       expect(screen.queryByTestId("player-4")).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: /play new game/i })
+      ).not.toBeInTheDocument();
+
+      await runTimers(15);
     });
 
     // ─── scenario 14: P1 stands, 3 players → decrease to 2, Start Game ───────
@@ -1690,16 +1699,14 @@ describe("Simple Jack Game UI", () => {
 
       fireEvent.click(screen.getByRole("button", { name: /start game/i }));
 
+      // If gameOver is not cleared, "Play New Game" appears immediately.
       expect(
         screen.queryByRole("button", { name: /play new game/i })
       ).not.toBeInTheDocument();
 
-      await runTimers(15);
-
-      expect(
-        screen.queryByRole("button", { name: /play new game/i })
-      ).not.toBeInTheDocument();
-
+      // Player panels appear before any cards are dealt — useEffect([players])
+      // initializes empty hands synchronously, before the first deal timer fires.
+      // At this point no cards have been dealt, so the game cannot have ended.
       await waitFor(() =>
         expect(screen.getByTestId("player-1")).toBeInTheDocument()
       );
@@ -1707,6 +1714,11 @@ describe("Simple Jack Game UI", () => {
         expect(screen.getByTestId("player-2")).toBeInTheDocument()
       );
       expect(screen.queryByTestId("player-3")).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: /play new game/i })
+      ).not.toBeInTheDocument();
+
+      await runTimers(15);
     });
   });
 
