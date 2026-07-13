@@ -1306,6 +1306,11 @@ describe("Simple Jack Game UI", () => {
     });
 
     // ─── scenario 10: increase players 2→4, click Start Game ────────────────
+    //
+    // Same note as scenario 9: P1 hit blackjack so hasStood=false and
+    // userCanChoose=true after startGame — the game loop short-circuits before
+    // it can race through stale hands. This does NOT catch the variant where
+    // P1 already busted or stood before the game ended.
 
     test("increasing number of players from 2 to 4 and clicking Start Game does not leave the game frozen on the old game-over state", async () => {
       jest.useFakeTimers();
@@ -1370,6 +1375,338 @@ describe("Simple Jack Game UI", () => {
       await waitFor(() =>
         expect(screen.getByTestId("player-4")).toBeInTheDocument()
       );
+    });
+
+    // ─── scenario 11: P1 busts (hits), 3 players → increase to 4, Start Game ─
+    //
+    // After P1 busts (isEliminated=true) the game ends. When the player count
+    // increases to 4 and Start Game is clicked, startGame clears gameOver but
+    // leaves the stale 3-player hands in state. The game loop sees
+    // isEliminated P1 (score≥17 → skip), P2 at 18 (skip), P3 at 19 (skip),
+    // and a phantom undefined P4, then wraps back to P1 with
+    // cardsDealtOnTurn=0 — immediately re-setting gameOver=true before
+    // useEffect([players]) can replace the hands with fresh ones.
+
+    test("increasing number of players from 3 to 4 after user busts does not leave the game frozen", async () => {
+      jest.useFakeTimers();
+
+      (useSimpleJackGame as jest.Mock).mockImplementation(() => {
+        const { useSimpleJackGame: testHook } = jest.requireActual(
+          "@/hooks/use-simple-jack"
+        );
+        // P1: King+5=15 → hits → +7=22 BUST
+        // P2: 8+Jack=18 (≥17, auto-stops)
+        // P3 (Dealer): 6+Queen=16 → +3=19 (wins)
+        return {
+          ...testHook({
+            deck: generateMockDeck({
+              "1": ["Spades-King", "Hearts-5", "Diamonds-7"],
+              "2": ["Clubs-8", "Hearts-Jack"],
+              "3": ["Diamonds-6", "Clubs-Queen", "Hearts-3"],
+            }),
+          }),
+        };
+      });
+
+      render(<Home />);
+      await startSetup("3");
+      await runTimers(10);
+
+      await waitFor(() =>
+        expect(
+          screen.getByRole("button", { name: /hit me/i })
+        ).toBeInTheDocument()
+      );
+
+      await waitFor(() => {
+        userEvent.click(screen.getByRole("button", { name: /hit me/i }));
+      });
+
+      await runTimers(10);
+
+      await waitFor(() =>
+        expect(screen.getByText("WIN!")).toBeInTheDocument()
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: /settings/i }));
+
+      await waitFor(() =>
+        fireEvent.change(screen.getByLabelText(/your name/i), {
+          target: { value: "TestUser" },
+        })
+      );
+      await waitFor(() =>
+        fireEvent.change(
+          screen.getByRole("combobox", { name: /number of players/i }),
+          { target: { value: "4" } }
+        )
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: /start game/i }));
+
+      expect(
+        screen.queryByRole("button", { name: /play new game/i })
+      ).not.toBeInTheDocument();
+
+      await runTimers(15);
+
+      expect(
+        screen.queryByRole("button", { name: /play new game/i })
+      ).not.toBeInTheDocument();
+
+      await waitFor(() =>
+        expect(screen.getByTestId("player-1")).toBeInTheDocument()
+      );
+      await waitFor(() =>
+        expect(screen.getByTestId("player-2")).toBeInTheDocument()
+      );
+      await waitFor(() =>
+        expect(screen.getByTestId("player-3")).toBeInTheDocument()
+      );
+      await waitFor(() =>
+        expect(screen.getByTestId("player-4")).toBeInTheDocument()
+      );
+      expect(screen.queryByTestId("player-5")).not.toBeInTheDocument();
+    });
+
+    // ─── scenario 12: P1 busts (hits), 3 players → decrease to 2, Start Game ─
+
+    test("decreasing number of players from 3 to 2 after user busts does not leave the game frozen", async () => {
+      jest.useFakeTimers();
+
+      (useSimpleJackGame as jest.Mock).mockImplementation(() => {
+        const { useSimpleJackGame: testHook } = jest.requireActual(
+          "@/hooks/use-simple-jack"
+        );
+        // P1: King+5=15 → hits → +7=22 BUST
+        // P2: 8+Jack=18 (≥17, auto-stops)
+        // P3 (Dealer): 6+Queen=16 → +3=19 (wins)
+        return {
+          ...testHook({
+            deck: generateMockDeck({
+              "1": ["Spades-King", "Hearts-5", "Diamonds-7"],
+              "2": ["Clubs-8", "Hearts-Jack"],
+              "3": ["Diamonds-6", "Clubs-Queen", "Hearts-3"],
+            }),
+          }),
+        };
+      });
+
+      render(<Home />);
+      await startSetup("3");
+      await runTimers(10);
+
+      await waitFor(() =>
+        expect(
+          screen.getByRole("button", { name: /hit me/i })
+        ).toBeInTheDocument()
+      );
+
+      await waitFor(() => {
+        userEvent.click(screen.getByRole("button", { name: /hit me/i }));
+      });
+
+      await runTimers(10);
+
+      await waitFor(() =>
+        expect(screen.getByText("WIN!")).toBeInTheDocument()
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: /settings/i }));
+
+      await waitFor(() =>
+        fireEvent.change(screen.getByLabelText(/your name/i), {
+          target: { value: "TestUser" },
+        })
+      );
+      await waitFor(() =>
+        fireEvent.change(
+          screen.getByRole("combobox", { name: /number of players/i }),
+          { target: { value: "2" } }
+        )
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: /start game/i }));
+
+      expect(
+        screen.queryByRole("button", { name: /play new game/i })
+      ).not.toBeInTheDocument();
+
+      await runTimers(15);
+
+      expect(
+        screen.queryByRole("button", { name: /play new game/i })
+      ).not.toBeInTheDocument();
+
+      await waitFor(() =>
+        expect(screen.getByTestId("player-1")).toBeInTheDocument()
+      );
+      await waitFor(() =>
+        expect(screen.getByTestId("player-2")).toBeInTheDocument()
+      );
+      expect(screen.queryByTestId("player-3")).not.toBeInTheDocument();
+    });
+
+    // ─── scenario 13: P1 stands, 2 players → increase to 3, Start Game ───────
+    //
+    // After P1 stands (hasStood=true) and the Dealer wins, startGame clears
+    // gameOver but leaves the stale 2-player hands. The game loop skips P1
+    // (hasStood), skips P2 (score≥17), then hits a phantom P3 (undefined),
+    // wraps back to P1 with cardsDealtOnTurn=0, and re-sets gameOver=true.
+
+    test("increasing number of players from 2 to 3 after user stands does not leave the game frozen", async () => {
+      jest.useFakeTimers();
+
+      (useSimpleJackGame as jest.Mock).mockImplementation(() => {
+        const { useSimpleJackGame: testHook } = jest.requireActual(
+          "@/hooks/use-simple-jack"
+        );
+        // P1: King+7=17 → stands
+        // P2 (Dealer): 8+Queen=18 (≥17, auto-stops, wins)
+        return {
+          ...testHook({
+            deck: generateMockDeck({
+              "1": ["Spades-King", "Hearts-7"],
+              "2": ["Clubs-8", "Hearts-Queen"],
+            }),
+          }),
+        };
+      });
+
+      render(<Home />);
+      await startSetup("2");
+      await runTimers(10);
+
+      await waitFor(() =>
+        expect(
+          screen.getByRole("button", { name: /stand/i })
+        ).toBeInTheDocument()
+      );
+
+      await waitFor(() => {
+        userEvent.click(screen.getByRole("button", { name: /stand/i }));
+      });
+
+      await runTimers(10);
+
+      await waitFor(() =>
+        expect(screen.getByText("WIN!")).toBeInTheDocument()
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: /settings/i }));
+
+      await waitFor(() =>
+        fireEvent.change(screen.getByLabelText(/your name/i), {
+          target: { value: "TestUser" },
+        })
+      );
+      await waitFor(() =>
+        fireEvent.change(
+          screen.getByRole("combobox", { name: /number of players/i }),
+          { target: { value: "3" } }
+        )
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: /start game/i }));
+
+      expect(
+        screen.queryByRole("button", { name: /play new game/i })
+      ).not.toBeInTheDocument();
+
+      await runTimers(15);
+
+      expect(
+        screen.queryByRole("button", { name: /play new game/i })
+      ).not.toBeInTheDocument();
+
+      await waitFor(() =>
+        expect(screen.getByTestId("player-1")).toBeInTheDocument()
+      );
+      await waitFor(() =>
+        expect(screen.getByTestId("player-2")).toBeInTheDocument()
+      );
+      await waitFor(() =>
+        expect(screen.getByTestId("player-3")).toBeInTheDocument()
+      );
+      expect(screen.queryByTestId("player-4")).not.toBeInTheDocument();
+    });
+
+    // ─── scenario 14: P1 stands, 3 players → decrease to 2, Start Game ───────
+
+    test("decreasing number of players from 3 to 2 after user stands does not leave the game frozen", async () => {
+      jest.useFakeTimers();
+
+      (useSimpleJackGame as jest.Mock).mockImplementation(() => {
+        const { useSimpleJackGame: testHook } = jest.requireActual(
+          "@/hooks/use-simple-jack"
+        );
+        // P1: King+7=17 → stands
+        // P2: 8+9=17 (≥17, auto-stops)
+        // P3 (Dealer): 6+Queen=16 → +4=20 (auto-deals, wins)
+        return {
+          ...testHook({
+            deck: generateMockDeck({
+              "1": ["Spades-King", "Hearts-7"],
+              "2": ["Clubs-8", "Hearts-9"],
+              "3": ["Diamonds-6", "Clubs-Queen", "Spades-4"],
+            }),
+          }),
+        };
+      });
+
+      render(<Home />);
+      await startSetup("3");
+      await runTimers(10);
+
+      await waitFor(() =>
+        expect(
+          screen.getByRole("button", { name: /stand/i })
+        ).toBeInTheDocument()
+      );
+
+      await waitFor(() => {
+        userEvent.click(screen.getByRole("button", { name: /stand/i }));
+      });
+
+      await runTimers(10);
+
+      await waitFor(() =>
+        expect(screen.getByText("WIN!")).toBeInTheDocument()
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: /settings/i }));
+
+      await waitFor(() =>
+        fireEvent.change(screen.getByLabelText(/your name/i), {
+          target: { value: "TestUser" },
+        })
+      );
+      await waitFor(() =>
+        fireEvent.change(
+          screen.getByRole("combobox", { name: /number of players/i }),
+          { target: { value: "2" } }
+        )
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: /start game/i }));
+
+      expect(
+        screen.queryByRole("button", { name: /play new game/i })
+      ).not.toBeInTheDocument();
+
+      await runTimers(15);
+
+      expect(
+        screen.queryByRole("button", { name: /play new game/i })
+      ).not.toBeInTheDocument();
+
+      await waitFor(() =>
+        expect(screen.getByTestId("player-1")).toBeInTheDocument()
+      );
+      await waitFor(() =>
+        expect(screen.getByTestId("player-2")).toBeInTheDocument()
+      );
+      expect(screen.queryByTestId("player-3")).not.toBeInTheDocument();
     });
   });
 

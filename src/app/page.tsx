@@ -25,6 +25,15 @@ export default function Home() {
       // When the player count changes on a completed game, useEffect([players])
       // resets playerHands but leaves gameOver=true, freezing the game loop.
       // Reset game-over state so the loop restarts with the new count.
+      //
+      // playerHands must also be cleared here. If stale hands remain (e.g.
+      // P1 busted or stood before the game ended), the game-loop effect fires
+      // between this setGameState and the useEffect([players]) setGameState,
+      // races through every stale player, hits an undefined slot for the new
+      // higher count (or wraps immediately for a lower count), finds
+      // cardsDealtOnTurn===0, and re-sets gameOver=true. Clearing playerHands
+      // prevents the loop from running until useEffect([players]) populates
+      // fresh empty hands.
       setGameState({
         ...gameState,
         dealingSpeed: config.dealingSpeed,
@@ -36,6 +45,7 @@ export default function Home() {
         gameOver: false,
         gameSummary: undefined,
         highScore: 0,
+        playerHands: undefined,
         pushMessage: undefined,
         winner: undefined,
       });
