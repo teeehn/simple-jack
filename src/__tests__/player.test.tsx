@@ -5,6 +5,7 @@ import "@testing-library/jest-dom";
 import { PlayerHand } from "@/shared/types";
 import { playerCardHand } from "@/lib/simple-jack";
 import { Player } from "../components/player";
+import { Card, EmptyCardSlot } from "../components/card";
 
 describe("Player", () => {
   test("Renders with default props.", () => {
@@ -27,5 +28,33 @@ describe("Player", () => {
     expect(screen.getAllByText("♠")).toHaveLength(3); // Card shows suit symbol 3 times (top-left, center, bottom-right)
     expect(screen.getAllByText("Ace")).toHaveLength(2); // Card shows value 2 times (top-left, bottom-right)
     expect(screen.getByText("11")).toBeInTheDocument();
+  });
+});
+
+describe("Card", () => {
+  test("renders without a className prop (uses default empty string)", () => {
+    const { container } = render(<Card card="Hearts-King" />);
+    expect(container.firstChild).toBeInTheDocument();
+    expect(screen.getAllByText("♥")).toHaveLength(3);
+    expect(screen.getAllByText("King")).toHaveLength(2);
+  });
+
+  test("renders with an explicit className prop", () => {
+    const { container } = render(
+      <Card card="Clubs-10" className="my-custom-class" />
+    );
+    expect(container.firstChild).toHaveClass("my-custom-class");
+  });
+});
+
+describe("EmptyCardSlot", () => {
+  test("renders without a className prop (uses default empty string)", () => {
+    const { container } = render(<EmptyCardSlot />);
+    expect(container.firstChild).toBeInTheDocument();
+  });
+
+  test("renders with an explicit className prop", () => {
+    const { container } = render(<EmptyCardSlot className="opacity-30" />);
+    expect(container.firstChild).toHaveClass("opacity-30");
   });
 });
