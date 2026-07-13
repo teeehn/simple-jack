@@ -651,9 +651,10 @@ describe("useSimpleJackGame Hook", () => {
         expect(result.current.gameState.playerHands![0].cards).toHaveLength(2)
       );
 
-      // Force P1's hand to hasStood=true while keeping currentPlayerIdx at 0.
-      // This exercises the game-loop block at lines 291-297 that handles the race
-      // where stand()'s setTimeout fires but the loop ticks before the idx update.
+      // Race condition: stand()'s setTimeout may fire after the game loop ticks but
+      // before currentPlayerIdx updates. This forces the specific state where
+      // P1.hasStood=true but currentPlayerIdx is still 0, ensuring the game loop
+      // correctly advances past the stuck player (lines 291-297).
       act(() => {
         result.current.setGameState((prev) => ({
           ...prev,
