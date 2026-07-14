@@ -1720,6 +1720,153 @@ describe("Simple Jack Game UI", () => {
 
       await runTimers(15);
     });
+
+    // ─── scenario 15: P1 busts, same player count, name-only change ──────────
+    //
+    // After a game ends, changing only the player name (keeping the same player
+    // count) falls into the else branch of startGame, which does not clear
+    // gameOver. The game remains frozen in the game-over state indefinitely.
+
+    test("changing only player name after game ends does not leave the game frozen", async () => {
+      jest.useFakeTimers();
+
+      (useSimpleJackGame as jest.Mock).mockImplementation(() => {
+        const { useSimpleJackGame: testHook } = jest.requireActual(
+          "@/hooks/use-simple-jack"
+        );
+        // P1: King+5=15 → hits → +7=22 BUST
+        // P2 (Dealer): 8+Jack=18 (≥17, wins)
+        return {
+          ...testHook({
+            deck: generateMockDeck({
+              "1": ["Spades-King", "Hearts-5", "Diamonds-7"],
+              "2": ["Clubs-8", "Hearts-Jack"],
+            }),
+          }),
+        };
+      });
+
+      render(<Home />);
+      await startSetup("2");
+      await runTimers(10);
+
+      await waitFor(() =>
+        expect(
+          screen.getByRole("button", { name: /hit me/i })
+        ).toBeInTheDocument()
+      );
+
+      await waitFor(() => {
+        userEvent.click(screen.getByRole("button", { name: /hit me/i }));
+      });
+
+      await runTimers(10);
+
+      await waitFor(() =>
+        expect(screen.getByText("WIN!")).toBeInTheDocument()
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: /settings/i }));
+
+      // Change only the player name — keep player count at 2
+      await waitFor(() =>
+        fireEvent.change(screen.getByLabelText(/your name/i), {
+          target: { value: "NewName" },
+        })
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: /start game/i }));
+
+      // If gameOver is not cleared, "Play New Game" appears immediately.
+      expect(
+        screen.queryByRole("button", { name: /play new game/i })
+      ).not.toBeInTheDocument();
+
+      await waitFor(() =>
+        expect(screen.getByTestId("player-1")).toBeInTheDocument()
+      );
+      await waitFor(() =>
+        expect(screen.getByTestId("player-2")).toBeInTheDocument()
+      );
+      expect(screen.queryByTestId("player-3")).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: /play new game/i })
+      ).not.toBeInTheDocument();
+
+      await runTimers(15);
+    });
+
+    // ─── scenario 16: P1 stands, same player count, dealing speed change ─────
+
+    test("changing only dealing speed after game ends does not leave the game frozen", async () => {
+      jest.useFakeTimers();
+
+      (useSimpleJackGame as jest.Mock).mockImplementation(() => {
+        const { useSimpleJackGame: testHook } = jest.requireActual(
+          "@/hooks/use-simple-jack"
+        );
+        // P1: King+7=17 → stands
+        // P2 (Dealer): 8+Queen=18 (≥17, wins)
+        return {
+          ...testHook({
+            deck: generateMockDeck({
+              "1": ["Spades-King", "Hearts-7"],
+              "2": ["Clubs-8", "Hearts-Queen"],
+            }),
+          }),
+        };
+      });
+
+      render(<Home />);
+      await startSetup("2");
+      await runTimers(10);
+
+      await waitFor(() =>
+        expect(
+          screen.getByRole("button", { name: /stand/i })
+        ).toBeInTheDocument()
+      );
+
+      await waitFor(() => {
+        userEvent.click(screen.getByRole("button", { name: /stand/i }));
+      });
+
+      await runTimers(10);
+
+      await waitFor(() =>
+        expect(screen.getByText("WIN!")).toBeInTheDocument()
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: /settings/i }));
+
+      // Change only the dealing speed — keep player count at 2 and name as-is
+      await waitFor(() =>
+        fireEvent.change(
+          screen.getByRole("combobox", { name: /dealing speed/i }),
+          { target: { value: "1000" } }
+        )
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: /start game/i }));
+
+      // If gameOver is not cleared, "Play New Game" appears immediately.
+      expect(
+        screen.queryByRole("button", { name: /play new game/i })
+      ).not.toBeInTheDocument();
+
+      await waitFor(() =>
+        expect(screen.getByTestId("player-1")).toBeInTheDocument()
+      );
+      await waitFor(() =>
+        expect(screen.getByTestId("player-2")).toBeInTheDocument()
+      );
+      expect(screen.queryByTestId("player-3")).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: /play new game/i })
+      ).not.toBeInTheDocument();
+
+      await runTimers(15);
+    });
   });
 
 });
