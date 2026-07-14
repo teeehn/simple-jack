@@ -6,6 +6,7 @@ import { Player } from "@/components/player";
 import { GameSetup } from "@/components/game-setup";
 import { GameControls } from "@/components/game-controls";
 import { EDealingSpeed } from "@/shared/types";
+import { playerCardHand } from "@/lib/simple-jack";
 
 interface GameSettings {
   playerName: string;
@@ -21,19 +22,16 @@ export default function Home() {
   const [savedSettings, setSavedSettings] = useState<GameSettings | null>(null);
 
   const startGame = (config: GameSettings) => {
-    if (gameState.gameOver && config.numPlayers !== gameState.players) {
-      // When the player count changes on a completed game, useEffect([players])
-      // resets playerHands but leaves gameOver=true, freezing the game loop.
-      // Reset game-over state so the loop restarts with the new count.
+    if (gameState.gameOver) {
+      // Any settings change on a completed game must fully reset game state.
       //
-      // playerHands must also be cleared here. If stale hands remain (e.g.
-      // P1 busted or stood before the game ended), the game-loop effect fires
-      // between this setGameState and the useEffect([players]) setGameState,
-      // races through every stale player, hits an undefined slot for the new
-      // higher count (or wraps immediately for a lower count), finds
-      // cardsDealtOnTurn===0, and re-sets gameOver=true. Clearing playerHands
-      // prevents the loop from running until useEffect([players]) populates
-      // fresh empty hands.
+      // When the player count changes, useEffect([players]) will fire and
+      // create fresh hands — so playerHands is cleared to undefined to prevent
+      // the game-loop effect from racing through stale hands before that fires.
+      //
+      // When the player count stays the same, useEffect([players]) does not
+      // fire, so fresh hands are created here directly.
+      const playerCountChanging = config.numPlayers !== gameState.players;
       setGameState({
         ...gameState,
         dealingSpeed: config.dealingSpeed,
@@ -45,7 +43,11 @@ export default function Home() {
         gameOver: false,
         gameSummary: undefined,
         highScore: 0,
-        playerHands: undefined,
+        playerHands: playerCountChanging
+          ? undefined
+          : Array.from({ length: config.numPlayers }, (_, i) =>
+              playerCardHand(i + 1)
+            ),
         pushMessage: undefined,
         winner: undefined,
       });
